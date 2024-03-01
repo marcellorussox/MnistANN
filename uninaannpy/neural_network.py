@@ -1,5 +1,6 @@
+from uninaannpy import activation_functions as af
+
 import numpy as np
-import activation_functions as af
 
 
 class NeuralNetwork:

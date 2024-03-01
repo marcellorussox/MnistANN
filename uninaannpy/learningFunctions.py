@@ -1,3 +1,7 @@
+from uninaannpy import error_functions as errfun
+
+from copy import deepcopy
+import matplotlib.pyplot as plt
 import numpy as np
 import activationFunctions as af
 import errorFunctions as errfun
@@ -199,7 +203,9 @@ def train_neural_network(net, X_train, Y_train, X_val=[], Y_val=[], max_epochs=1
     accuracy_vali = compute_accuracy(Y_net_val, Y_val)
     training_accuracy.append(accuracy_train)
     validation_accuracy.append(accuracy_vali)
-    print(f'0/{max_epochs}, Training Accuracy: {accuracy_train}, Validation Accuracy: {accuracy_vali}')
+    print(f'\n0/{max_epochs}\n'
+          f'Training Accuracy: {percentage(accuracy_train)}%,\n'
+          f'Validation Accuracy: {percentage(accuracy_vali)}%\n')
 
     # Inizio fase di apprendimento
     for epoch in range(max_epochs):
@@ -241,8 +247,9 @@ def train_neural_network(net, X_train, Y_train, X_val=[], Y_val=[], max_epochs=1
         accuracy_vali = compute_accuracy(Y_net_val, Y_val)
         training_accuracy.append(accuracy_train)
         validation_accuracy.append(accuracy_vali)
-        print(f'{epoch + 1}/{max_epochs}, Training Accuracy: {accuracy_train}, Validation Accuracy: {accuracy_vali}',
-              end='\r')
+        print(f'\n{epoch + 1}/{max_epochs}\n'
+              f'Training Accuracy: {percentage(accuracy_train)}%,\n'
+              f'Validation Accuracy: {percentage(accuracy_vali)}%\n')
 
     copy_params_in_network(net, best_net)
 
