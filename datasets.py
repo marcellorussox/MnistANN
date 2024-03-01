@@ -1,44 +1,110 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import os
-import numpy as np
 
 
-# Funzione per creare input e target per il validation set
-def get_mnist_validation(data, n, val_index):
-    data_val = data[0:val_index - 1].T
-    Y_val = data_val[0]  # Etichette di validation
-    Y_val = get_mnist_labels(Y_val)  # numero di etichette ridotto a 10
-    X_val = data_val[1:n]  # Dati di input di validation
-    X_val = X_val / 255.  # Normalizzazione dei dati divisi per 255
-    return X_val, Y_val
+def get_mnist_training(dataset, num_rows, num_cols, validation_index):
+    """
+    Funzione per creare input e target per il training set a partire da un dataset MNIST.
+
+    Args:
+    dataset (numpy.ndarray): Il dataset MNIST completo.
+    rows (int): Il numero totale di righe nel dataset di training.
+    cols (int): Il numero totale di colonne nel dataset.
+    validation_index (int): L'indice di inizio dei dati di training nel dataset.
+
+    Returns:
+    tuple: Una tupla contenente i dati di input di training e le relative etichette.
+    """
+
+    # Estrae i dati di training dal dataset, considerando l'indice di validazione
+    data_train = dataset[validation_index:num_rows].T
+
+    # Estrae le etichette di training
+    train_labels = data_train[0]  # Etichette di training
+
+    # Riduce il numero di etichette a 10
+    train_labels = get_mnist_labels(train_labels)
+
+    # Estrae i dati di input di training e normalizza dividendo per 255
+    train_input = data_train[1:num_cols]  # Dati di input di training
+    train_input = train_input / 255.  # Normalizzazione dei dati divisi per 255
+
+    return train_input, train_labels
 
 
-# Funzione per creare input e target per il training set
-def get_mnist_training(data, n, m, val_index):
-    data_train = data[val_index:m].T
-    Y_train = data_train[0]  # Etichette di training
-    Y_train = get_mnist_labels(Y_train)  # numero di etichette ridotto a 10
-    X_train = data_train[1:n]  # Dati di input di training
-    X_train = X_train / 255.  # Normalizzazione dei dati divisi per 255
-    return X_train, Y_train
+def get_mnist_validation(dataset, num_cols, validation_index):
+    """
+    Crea input e target per il set di validation utilizzando il dataset MNIST.
+
+    Args:
+    dataset (numpy.ndarray): Il dataset MNIST completo.
+    num_cols (int): Il numero totale di colonne nel dataset.
+    validation_index (int): L'indice di fine dei dati di validation nel dataset.
+
+    Returns:
+    tuple: Una tupla contenente i dati di input di validation e le relative etichette.
+    """
+
+    # Estrae i dati di validation dal dataset
+    data_val = dataset[0:validation_index - 1].T
+
+    # Estrae le etichette di validation
+    validation_labels = data_val[0]  # Etichette di validation
+
+    # Riduce il numero di etichette a 10
+    validation_labels = get_mnist_labels(validation_labels)
+
+    # Estrae i dati di input di validation e normalizza dividendo per 255
+    validation_input = data_val[1:num_cols]  # Dati di input di validation
+    validation_input = validation_input / 255.  # Normalizzazione dei dati divisi per 255
+
+    return validation_input, validation_labels
 
 
-# Funzione per creare input e target per il test set
-def get_mnist_testing(data, n, m):
-    data_test = data[0:m].T
-    Y_test = data_test[0]  # Etichette di testing
-    Y_test = get_mnist_labels(Y_test)  # numero di etichette ridotto a 10
-    X_test = data_test[1:n]  # Dati di input di testing
-    return X_test, Y_test
+def get_mnist_testing(dataset, num_rows, num_cols):
+    """
+    Crea input e target per il set di testing utilizzando il dataset MNIST.
+
+    Args:
+    dataset (numpy.ndarray): Il dataset MNIST completo.
+    num_rows (int): Il numero totale di righe nel dataset.
+    num_cols (int): Il numero totale di colonne nel dataset.
+
+    Returns:
+    tuple: Una tupla contenente i dati di input di testing e le relative etichette.
+    """
+
+    # Estrae i dati di testing dal dataset
+    data_test = dataset[0:num_rows].T
+
+    # Estrae le etichette di testing
+    test_labels = data_test[0]  # Etichette di testing
+
+    # Riduce il numero di etichette a 10
+    test_labels = get_mnist_labels(test_labels)
+
+    # Estrae i dati di input di testing
+    test_input = data_test[1:num_cols]  # Dati di input di testing
+
+    return test_input, test_labels
 
 
-# Funzione per creare label one hot
 def get_mnist_labels(labels):
-    labels = np.array(labels)
-    one_hot_labels = np.zeros((10, labels.shape[0]), dtype=int)
+    """
+    Converte le etichette in formato one-hot.
 
-    for n in range(labels.shape[0]):
+    Args:
+    labels (numpy.ndarray): Array contenente le etichette.
+
+    Returns:
+    numpy.ndarray: Array contenente le etichette in formato one-hot.
+    """
+
+    labels = np.array(labels)
+    num_labels = labels.shape[0]
+    num_classes = 10  # Numero di classi (etichette) nel dataset MNIST
+    one_hot_labels = np.zeros((num_classes, num_labels), dtype=int)
+
+    for n in range(num_labels):
         label = labels[n]
         one_hot_labels[label][n] = 1
 
