@@ -12,12 +12,12 @@ class NeuralNetwork:
         Costruttore per la creazione della rete neurale.
 
         Args:
-        hidden_activation_functions (list): Lista delle funzioni di attivazione degli strati nascosti.
-        output_activation_function (function): Funzione di attivazione dello strato di output.
-        error_function (function): Funzione di errore.
-        input_layer_size (int): Dimensione dello strato di input.
-        hidden_layers (list): Lista che contiene il numero di neuroni per ogni strato nascosto.
-        output_layer_size (int): Dimensione dello strato di output.
+            hidden_activation_functions (list): Lista delle funzioni di attivazione degli strati nascosti.
+            output_activation_function (function): Funzione di attivazione dello strato di output.
+            error_function (function): Funzione di errore.
+            input_layer_size (int): Dimensione dello strato di input.
+            hidden_layers (list): Lista che contiene il numero di neuroni per ogni strato nascosto.
+            output_layer_size (int): Dimensione dello strato di output.
         """
 
         self.layers_bias = []
@@ -38,8 +38,8 @@ class NeuralNetwork:
         Inizializza i pesi e i bias per tutti gli strati della rete neurale.
 
         Args:
-        input_layer_size (int): Dimensione dello strato di input.
-        output_layer_size (int): Dimensione dello strato di output.
+            input_layer_size (int): Dimensione dello strato di input.
+            output_layer_size (int): Dimensione dello strato di output.
         """
 
         hidden_layer_size = self.hidden_layers
@@ -63,9 +63,9 @@ class NeuralNetwork:
         Inizializza i pesi per uno specifico strato della rete neurale.
 
         Args:
-        index (int): Indice dello strato.
-        number_of_layer_neurons (int): Numero di neuroni nello strato.
-        input_variables (int): Numero di variabili di input.
+            index (int): Indice dello strato.
+            number_of_layer_neurons (int): Numero di neuroni nello strato.
+            input_variables (int): Numero di variabili di input.
         """
 
         self.layers_weights.insert(index, np.random.normal(self.MU, self.SIGMA, size=(number_of_layer_neurons,
@@ -76,8 +76,8 @@ class NeuralNetwork:
         Inizializza i bias per uno specifico strato della rete neurale.
 
         Args:
-        index (int): Indice dello strato.
-        number_of_layer_neurons (int): Numero di neuroni nello strato.
+            index (int): Indice dello strato.
+            number_of_layer_neurons (int): Numero di neuroni nello strato.
         """
 
         self.layers_bias.insert(index, np.random.normal(self.MU, self.SIGMA, size=(number_of_layer_neurons, 1)))
@@ -87,10 +87,10 @@ class NeuralNetwork:
         Restituisce i pesi per uno specifico strato della rete neurale.
 
         Args:
-        layer (int, optional): Indice dello strato.
+            layer (int, optional): Indice dello strato.
 
         Returns:
-        numpy.ndarray: Pesi per lo strato specificato.
+            numpy.ndarray: Pesi per lo strato specificato.
         """
 
         weights = self.layers_weights
@@ -104,10 +104,10 @@ class NeuralNetwork:
         Restituisce i bias per uno specifico strato della rete neurale.
 
         Args:
-        layer (int, optional): Indice dello strato.
+            layer (int, optional): Indice dello strato.
 
         Returns:
-        numpy.ndarray: Bias per lo strato specificato.
+            numpy.ndarray: Bias per lo strato specificato.
         """
 
         biases = self.layers_bias
@@ -122,10 +122,10 @@ class NeuralNetwork:
         Restituisce le funzioni di attivazione per uno specifico strato della rete.
 
         Args:
-        layer (int, optional): Indice dello strato.
+            layer (int, optional): Indice dello strato.
 
         Returns:
-        list: Funzioni di attivazione del layer specificato.
+            list: Funzioni di attivazione del layer specificato.
         """
         if layer > 0:
             return self.hidden_activation_functions[layer - 1]
@@ -138,12 +138,12 @@ class NeuralNetwork:
         Imposta le funzioni di attivazione per la rete neurale.
 
         Args:
-        network (NeuralNetwork): Rete neurale.
-        layer_indices (list): Indici degli strati da modificare.
-        activation_function (function, optional): Funzione di attivazione da impostare.
-        layer_type (int, optional): Tipo di modifica da applicare.
+            network (NeuralNetwork): Rete neurale.
+            layer_indices (list): Indici degli strati da modificare.
+            activation_function (function, optional): Funzione di attivazione da impostare.
+            layer_type (int, optional): Tipo di modifica da applicare.
         Returns:
-        NeuralNetwork: Rete neurale modificata.
+            NeuralNetwork: Rete neurale modificata.
         """
         if layer_type == 0:  # Modifica la funzione di attivazione per gli strati specificati
             if np.isscalar(layer_indices):

@@ -6,13 +6,13 @@ def get_mnist_training(dataset, num_rows, num_cols, validation_index):
     Funzione per creare input e target per il training set a partire da un dataset MNIST.
 
     Args:
-    dataset (numpy.ndarray): Il dataset MNIST completo.
-    rows (int): Il numero totale di righe nel dataset di training.
-    cols (int): Il numero totale di colonne nel dataset.
-    validation_index (int): L'indice di inizio dei dati di training nel dataset.
+        dataset (numpy.ndarray): Il dataset MNIST completo.
+        rows (int): Il numero totale di righe nel dataset di training.
+        cols (int): Il numero totale di colonne nel dataset.
+        validation_index (int): L'indice di inizio dei dati di training nel dataset.
 
     Returns:
-    tuple: Una tupla contenente i dati di input di training e le relative etichette.
+        tuple: Una tupla contenente i dati di input di training e le relative etichette.
     """
 
     # Estrae i dati di training dal dataset, considerando l'indice di validazione
@@ -36,12 +36,12 @@ def get_mnist_validation(dataset, num_cols, validation_index):
     Crea input e target per il set di validation utilizzando il dataset MNIST.
 
     Args:
-    dataset (numpy.ndarray): Il dataset MNIST completo.
-    num_cols (int): Il numero totale di colonne nel dataset.
-    validation_index (int): L'indice di fine dei dati di validation nel dataset.
+        dataset (numpy.ndarray): Il dataset MNIST completo.
+        num_cols (int): Il numero totale di colonne nel dataset.
+        validation_index (int): L'indice di fine dei dati di validation nel dataset.
 
     Returns:
-    tuple: Una tupla contenente i dati di input di validation e le relative etichette.
+        tuple: Una tupla contenente i dati di input di validation e le relative etichette.
     """
 
     # Estrae i dati di validation dal dataset
@@ -65,12 +65,12 @@ def get_mnist_testing(dataset, num_rows, num_cols):
     Crea input e target per il set di testing utilizzando il dataset MNIST.
 
     Args:
-    dataset (numpy.ndarray): Il dataset MNIST completo.
-    num_rows (int): Il numero totale di righe nel dataset.
-    num_cols (int): Il numero totale di colonne nel dataset.
+        dataset (numpy.ndarray): Il dataset MNIST completo.
+        num_rows (int): Il numero totale di righe nel dataset.
+        num_cols (int): Il numero totale di colonne nel dataset.
 
     Returns:
-    tuple: Una tupla contenente i dati di input di testing e le relative etichette.
+        tuple: Una tupla contenente i dati di input di testing e le relative etichette.
     """
 
     # Estrae i dati di testing dal dataset
@@ -93,10 +93,10 @@ def get_mnist_labels(labels):
     Converte le etichette in formato one-hot.
 
     Args:
-    labels (numpy.ndarray): Array contenente le etichette.
+        labels (numpy.ndarray): Array contenente le etichette.
 
     Returns:
-    numpy.ndarray: Array contenente le etichette in formato one-hot.
+        numpy.ndarray: Array contenente le etichette in formato one-hot.
     """
 
     labels = np.array(labels)
