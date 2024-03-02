@@ -7,8 +7,8 @@ def get_mnist_training(dataset, num_rows, num_cols, validation_index):
 
     Args:
         dataset (numpy.ndarray): Il dataset MNIST completo.
-        rows (int): Il numero totale di righe nel dataset di training.
-        cols (int): Il numero totale di colonne nel dataset.
+        num_rows (int): Il numero totale di righe nel dataset di training.
+        num_cols (int): Il numero totale di colonne nel dataset.
         validation_index (int): L'indice di inizio dei dati di training nel dataset.
 
     Returns:
