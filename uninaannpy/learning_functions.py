@@ -5,21 +5,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def percentage(value):
+def format_percentage(value):
     """
-    Converte un valore in una percentuale compresa tra 0 e 100 con solo le prime 5 cifre decimali.
+    Formatta un valore o un array di valori come percentuale compresa tra 0 e 100 con solo le prime 5 cifre decimali.
 
     Args:
-        value (float): Il valore da convertire in percentuale.
+        value (float or numpy.ndarray): Valore o array di valori da formattare come percentuale.
 
     Returns:
-        float: Il valore percentuale compreso tra 0 e 100 con solo le prime 5 cifre decimali.
+        float or numpy.ndarray: Valore o array dei valori percentuali formattati.
     """
-    # Assicura che il valore sia compreso tra 0 e 100
-    percentage_value = value * 100
-    # Limita il valore percentuale a 5 cifre decimali
-    percentage_value = round(percentage_value, 3)
-    return percentage_value
+    # Se il valore è un array, applica il formattazione a ciascun elemento
+    if isinstance(value, np.ndarray):
+        return np.round(value * 100, decimals=5)
+    # Se il valore è un float, applica il formattazione direttamente
+    else:
+        return round(value * 100, 5)
 
 
 def copy_params_in_network(dst_net, src_net):
@@ -64,16 +65,12 @@ def get_net_structure(net):
     error_function = net.error_function.__name__
 
     # Stampa delle caratteristiche della rete
-    print('Numero di strati nascosti: ', num_hidden_layers)
-    print('Dimensione dell\'input: ', input_size)
-    print('Dimensione dell\'output: ', output_size)
-    print('Neuroni negli strati nascosti: ')
-    for neurons in num_neurons_hidden_layers:
-        print(neurons)
-    print('Funzioni di attivazione: ')
-    for act_fun in activation_functions:
-        print(act_fun)
-    print('Funzione di errore: ', error_function)
+    print('Numero di strati nascosti:', num_hidden_layers)
+    print('Dimensione dell\'input:', input_size)
+    print('Dimensione dell\'output:', output_size)
+    print('Neuroni negli strati nascosti:', ', '.join(map(str, num_neurons_hidden_layers)))
+    print('Funzioni di attivazione:', ', '.join(activation_functions))
+    print('Funzione di errore:', error_function)
 
 
 def duplicate_network(net):
@@ -324,8 +321,8 @@ def train_neural_network(net, train_in, train_labels, validation_in, validation_
     train_accuracies.append(train_accuracy)
     validation_accuracies.append(validation_accuracy)
     print(f'\n0/{max_epochs}\n'
-          f'Training Accuracy: {percentage(train_accuracy)}%,\n'
-          f'Validation Accuracy: {percentage(validation_accuracy)}%\n')
+          f'Training Accuracy: {format_percentage(train_accuracy)}%,\n'
+          f'Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
 
     # Inizio fase di apprendimento
     for epoch in range(max_epochs):
@@ -368,8 +365,8 @@ def train_neural_network(net, train_in, train_labels, validation_in, validation_
         train_accuracies.append(train_accuracy)
         validation_accuracies.append(validation_accuracy)
         print(f'\n{epoch + 1}/{max_epochs}\n'
-              f'Training Accuracy: {percentage(train_accuracy)}%,\n'
-              f'Validation Accuracy: {percentage(validation_accuracy)}%\n')
+              f'Training Accuracy: {format_percentage(train_accuracy)}%,\n'
+              f'Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
 
     copy_params_in_network(net, best_net)
 
@@ -439,5 +436,9 @@ def test_prediction(network, train_mia_net, x, Xtest):
     # Utilizza la funzione softmax per ottenere valori probabilistici
     y_net = errfun.softmax(y_net)
     y_net_trained = errfun.softmax(y_net_trained)
-    print('y_net:', y_net)
-    print('y_net_trained:', y_net_trained)
+    print('Probabilità predette dalla rete non addestrata:')
+    for i, probability in enumerate(y_net):
+        print(f'Classe {i}: {format_percentage(probability[0])}%')
+    print('\nProbabilità predette dalla rete addestrata:')
+    for i, probability in enumerate(y_net_trained):
+        print(f'Classe {i}: {format_percentage(probability[0])}%')
