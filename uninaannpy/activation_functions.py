@@ -1,7 +1,6 @@
 import numpy as np
 
 
-# Funzione identità
 def identity(x, der=False):
     """
     Calcola la funzione identità o anche la sua derivata.
@@ -20,7 +19,6 @@ def identity(x, der=False):
         return x, 1  # La derivata della funzione identità è sempre 1
 
 
-# Funzione tangente iperbolica
 def tanh(x, der=False):
     """
     Calcola la tangente iperbolica o anche la sua derivata.
@@ -40,7 +38,6 @@ def tanh(x, der=False):
         return y, 1 - y * y  # Derivata della tangente iperbolica
 
 
-# Funzione ReLU (Rectified Linear Unit)
 def relu(x, der=0):
     """
     Calcola la funzione ReLU o la sua derivata.
@@ -59,7 +56,6 @@ def relu(x, der=0):
         return np.maximum(0, x), np.where(x > 0, 1, 0)  # Derivata della funzione ReLU
 
 
-# Funzione Leaky ReLU (Leaky Rectified Linear Unit)
 def leaky_relu(x, der=False, alpha=0.01):
     """
     Calcola la funzione Leaky ReLU o la sua derivata.
