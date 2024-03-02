@@ -1,7 +1,6 @@
 import numpy as np
 
 
-# Funzione di somma dei quadrati
 def sum_of_squares(net_output, labels, der=False):
     """
     Calcola la funzione di somma dei quadrati o la sua derivata.
@@ -23,7 +22,6 @@ def sum_of_squares(net_output, labels, der=False):
         return z
 
 
-# Funzione di post-processing softmax
 def softmax(net_output):
     """
     Calcola la funzione softmax per ogni elemento del vettore net_output.
@@ -47,7 +45,6 @@ def softmax(net_output):
     return z
 
 
-# Funzione di cross-entropy con softmax
 def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15):
     """
     Calcola la cross-entropy tra i valori previsti net_output e i valori target labels utilizzando la funzione softmax.
@@ -72,7 +69,6 @@ def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15):
         return softmax_output - labels
 
 
-# Funzione di cross-entropy
 def cross_entropy(net_output, labels, der=False, epsilon=1e-15):
     """
     Calcola la cross-entropy tra l'output della rete e le etichette fornite.
