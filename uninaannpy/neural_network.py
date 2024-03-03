@@ -20,7 +20,7 @@ class NeuralNetwork:
             output_layer_size (int): Dimensione dello strato di output.
         """
 
-        self.layers_bias = []
+        self.layers_biases = []
         self.layers_weights = []
         self.hidden_layers = hidden_layers
 
@@ -80,7 +80,7 @@ class NeuralNetwork:
             number_of_layer_neurons (int): Numero di neuroni nello strato.
         """
 
-        self.layers_bias.insert(index, np.random.normal(self.MU, self.SIGMA, size=(number_of_layer_neurons, 1)))
+        self.layers_biases.insert(index, np.random.normal(self.MU, self.SIGMA, size=(number_of_layer_neurons, 1)))
 
     def get_weights(self, layer=0):
         """
@@ -110,7 +110,7 @@ class NeuralNetwork:
             numpy.ndarray: Bias per lo strato specificato.
         """
 
-        biases = self.layers_bias
+        biases = self.layers_biases
         if layer > 0:
             return biases[layer - 1]
         else:

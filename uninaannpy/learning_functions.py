@@ -34,7 +34,7 @@ def copy_params_in_network(dst_net, src_net):
     # Copia dei pesi e dei bias
     for layer in range(len(src_net.layers_weights)):
         dst_net.layers_weights[layer] = src_net.layers_weights[layer].copy()
-        dst_net.layers_bias[layer] = src_net.layers_bias[layer].copy()
+        dst_net.layers_biases[layer] = src_net.layers_biases[layer].copy()
 
     # Copia delle funzioni di attivazione
     dst_net.hidden_activation_functions = src_net.hidden_activation_functions
@@ -99,7 +99,7 @@ def forward_propagation(net, input_data):
     """
     # Estrae i parametri della rete
     weights = net.layers_weights
-    biases = net.layers_bias
+    biases = net.layers_biases
     activation_functions = net.hidden_activation_functions
     num_layers = len(net.layers_weights)
 
@@ -126,7 +126,7 @@ def compute_gradients(net, input_data):
     """
     # Estrazione dei parametri della rete
     weights = net.layers_weights
-    biases = net.layers_bias
+    biases = net.layers_biases
     activation_functions = net.hidden_activation_functions
 
     num_layers = len(net.layers_weights)
@@ -214,7 +214,7 @@ def gradient_descent(net, learning_rate, weights_der, biases_der):
         net.layers_weights[layer] -= learning_rate * weights_der[layer]
 
         # Aggiornamento dei bias utilizzando il gradiente discendente
-        net.layers_bias[layer] -= learning_rate * biases_der[layer]
+        net.layers_biases[layer] -= learning_rate * biases_der[layer]
 
     return net
 
@@ -242,38 +242,44 @@ def rprop(network, weights_der, biases_der, weights_delta, biases_delta, weights
     """
     for layer in range(len(network.layers_weights)):
         layer_weights = network.layers_weights[layer]
-        layer_biases = network.layers_bias[layer]
+        layer_biases = network.layers_biases[layer]
 
         for k in range(len(weights_der[layer])):
             for m in range(len(weights_der[layer][k])):
+        for num_rows in range(len(weights_der[layer])):
+            for num_cols in range(len(weights_der[layer][num_rows])):
                 # Calcolo della nuova dimensione del delta per i pesi
-                if weights_der_prev[layer][k][m] * weights_der[layer][k][m] > 0:
-                    weights_delta[layer][k][m] = min(weights_delta[layer][k][m] * eta_pos, delta_max)
-                elif weights_der_prev[layer][k][m] * weights_der[layer][k][m] < 0:
-                    weights_delta[layer][k][m] = max(weights_delta[layer][k][m] * eta_neg, delta_min)
+                if weights_der_prev[layer][num_rows][num_cols] * weights_der[layer][num_rows][num_cols] > 0:
+                    weights_delta[layer][num_rows][num_cols] = min(weights_delta[layer][num_rows][num_cols] * eta_pos,
+                                                                   delta_max)
+                elif weights_der_prev[layer][num_rows][num_cols] * weights_der[layer][num_rows][num_cols] < 0:
+                    weights_delta[layer][num_rows][num_cols] = max(weights_delta[layer][num_rows][num_cols] * eta_neg,
+                                                                   delta_min)
 
                 # Aggiornamento dei pesi
-                layer_weights[k][m] -= np.sign(weights_der[layer][k][m]) * weights_delta[layer][k][m]
+                layer_weights[num_rows][num_cols] -= (np.sign(weights_der[layer][num_rows][num_cols]) *
+                                                      weights_delta[layer][num_rows][num_cols])
 
                 # Aggiornamento dei gradienti dei pesi precedenti
-                weights_der_prev[layer][k][m] = weights_der[layer][k][m]
+                weights_der_prev[layer][num_rows][num_cols] = weights_der[layer][num_rows][num_cols]
 
             # Calcolo della nuova dimensione del delta per i bias
-            if biases_der_prev[layer][k][0] * biases_der[layer][k][0] > 0:
-                biases_delta[layer][k][0] = min(biases_delta[layer][k][0] * eta_pos, delta_max)
-            elif biases_der_prev[layer][k][0] * biases_der[layer][k][0] < 0:
-                biases_delta[layer][k][0] = max(biases_delta[layer][k][0] * eta_neg, delta_min)
+            if biases_der_prev[layer][num_rows][0] * biases_der[layer][num_rows][0] > 0:
+                biases_delta[layer][num_rows][0] = min(biases_delta[layer][num_rows][0] * eta_pos, delta_max)
+            elif biases_der_prev[layer][num_rows][0] * biases_der[layer][num_rows][0] < 0:
+                biases_delta[layer][num_rows][0] = max(biases_delta[layer][num_rows][0] * eta_neg, delta_min)
 
             # Aggiornamento dei bias
-            layer_biases[k][0] -= np.sign(biases_der[layer][k][0]) * biases_delta[layer][k][0]
+            layer_biases[num_rows][0] -= np.sign(biases_der[layer][num_rows][0]) * biases_delta[layer][num_rows][0]
 
             # Aggiornamento dei gradienti dei bias precedenti
-            biases_der_prev[layer][k][0] = biases_der[layer][k][0]
+            biases_der_prev[layer][num_rows][0] = biases_der[layer][num_rows][0]
 
     return network
 
 
 def train_neural_network(net, train_in, train_labels, validation_in, validation_labels, max_epochs=100,
+def train_neural_network(net, train_in, train_labels, validation_in, validation_labels, epochs=100,
                          learning_rate=0.1):
     """
     Processo di apprendimento per la rete neurale.
@@ -284,7 +290,7 @@ def train_neural_network(net, train_in, train_labels, validation_in, validation_
         train_labels (numpy.ndarray): Target desiderati per i dati di input di training.
         validation_in (numpy.ndarray): Dati di input per la validazione.
         validation_labels (numpy.ndarray): Target desiderati per i dati di input di validazione.
-        max_epochs (int, optional): Numero massimo di epoche per il training. Default: 100.
+        epochs (int, optional): Numero massimo di epoche per il training. Default: 100.
         learning_rate (float, optional): Tasso di apprendimento per il gradiente discendente. Default: 0.1.
 
     Returns:
@@ -320,12 +326,12 @@ def train_neural_network(net, train_in, train_labels, validation_in, validation_
     validation_accuracy = compute_accuracy(validation_net_out, validation_labels)
     train_accuracies.append(train_accuracy)
     validation_accuracies.append(validation_accuracy)
-    print(f'\n0/{max_epochs}\n'
+    print(f'\n0/{epochs}\n'
           f'Training Accuracy: {format_percentage(train_accuracy)}%,\n'
           f'Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
 
     # Inizio fase di apprendimento
-    for epoch in range(max_epochs):
+    for epoch in range(epochs):
         # Gradient descent e Back-propagation
         layer_out, layer_act_fun_der = compute_gradients(net, train_in)
         weights_der, biases_der = back_propagation(net, layer_act_fun_der, layer_out, train_labels, error_function)
@@ -342,7 +348,7 @@ def train_neural_network(net, train_in, train_labels, validation_in, validation_
             biases_der_prev = deepcopy(biases_der)
         else:
             # Aggiornamento della rete utilizzando la funzione RProp
-            net = rprop(net, weights_der, biases_der, weights_delta, biases_delta,
+            net = rprop_plus(net, weights_der, biases_der, weights_delta, biases_delta,
                         weights_der_prev, biases_der_prev)
 
         # Forward propagation per training set
@@ -364,7 +370,7 @@ def train_neural_network(net, train_in, train_labels, validation_in, validation_
         validation_accuracy = compute_accuracy(validation_net_out, validation_labels)
         train_accuracies.append(train_accuracy)
         validation_accuracies.append(validation_accuracy)
-        print(f'\n{epoch + 1}/{max_epochs}\n'
+        print(f'\n{epoch + 1}/{epochs}\n'
               f'Training Accuracy: {format_percentage(train_accuracy)}%,\n'
               f'Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
 
