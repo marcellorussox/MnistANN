@@ -35,7 +35,7 @@ def tanh(x, der=False):
     if not der:
         return y
     else:
-        return y, 1 - y * y  # Derivata della tangente iperbolica
+        return y, 1 - y**2  # Derivata della tangente iperbolica
 
 
 def relu(x, der=0):
