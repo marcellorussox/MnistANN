@@ -6,6 +6,8 @@ from uninaannpy import utility as ut
 
 import numpy as np
 
+from uninaannpy.learning_functions import RPropType
+
 
 class NeuralNetwork:
     MU, SIGMA = 0, 0.1
@@ -317,10 +319,10 @@ class NeuralNetwork:
             float: Percentuale di predizioni corrette rispetto ai target desiderati.
         """
         output = self.forward_propagation(input_data)
-        return ut.compute_accuracy(output, labels)
+        return ut.format_percentage(ut.compute_accuracy(output, labels))
 
     def train_neural_network(self, train_in, train_labels, validation_in, validation_labels, epochs=100,
-                             learning_rate=0.1):
+                             learning_rate=0.1, rprop_type=RPropType.STANDARD):
         """
         Processo di apprendimento per la rete neurale.
 
@@ -332,6 +334,7 @@ class NeuralNetwork:
             validation_labels (numpy.ndarray): Target desiderati per i dati di input di validazione.
             epochs (int, optional): Numero massimo di epoche per il training. Default: 100.
             learning_rate (float, optional): Tasso di apprendimento per il gradiente discendente. Default: 0.1.
+            rprop_type (RPropType): Tipo di RProp da utilizzare (default: RpropType.STANDARD).
 
         Returns:
             tuple: Una tupla contenente:
@@ -390,8 +393,8 @@ class NeuralNetwork:
                 biases_der_prev = deepcopy(biases_der)
             else:
                 # Aggiornamento della rete utilizzando la funzione RProp
-                lf.irprop_plus(self, weights_der, biases_der, weights_delta, biases_delta,
-                               weights_der_prev, biases_der_prev, train_error, train_error_prev)
+                lf.rprops(self, weights_der, biases_der, weights_delta, biases_delta,
+                               weights_der_prev, biases_der_prev, train_error, train_error_prev, rprop_type=rprop_type)
 
             if epoch > 0:
                 train_error_prev = train_error
