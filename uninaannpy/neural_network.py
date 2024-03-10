@@ -1,12 +1,17 @@
 from copy import deepcopy
+from enum import Enum
 
 from uninaannpy import activation_functions as af
-from uninaannpy import learning_functions as lf
 from uninaannpy import utility as ut
 
 import numpy as np
 
-from uninaannpy.learning_functions import RPropType
+
+class RPropType(Enum):
+    STANDARD = 1
+    RPROP_PLUS = 2
+    IRPROP = 3
+    IRPROP_PLUS = 4
 
 
 class NeuralNetwork:
@@ -55,9 +60,9 @@ class NeuralNetwork:
         self.__initialize_bias(0, hidden_layer_size[0])
 
         # Inizializzazione dei pesi e dei bias per gli strati nascosti
-        for i in range(1, self.number_of_hidden_layers):
-            self.__initialize_weights(i, hidden_layer_size[i], hidden_layer_size[i])
-            self.__initialize_bias(i, hidden_layer_size[i])
+        for layer in range(1, self.number_of_hidden_layers):
+            self.__initialize_weights(layer, hidden_layer_size[layer], hidden_layer_size[layer])
+            self.__initialize_bias(layer, hidden_layer_size[layer])
 
         # Inizializzazione dei pesi e dei bias per lo strato di output
         self.__initialize_weights(self.number_of_hidden_layers, output_layer_size,
@@ -219,7 +224,6 @@ class NeuralNetwork:
         Esegue la propagazione in avanti attraverso la rete neurale.
 
         Args:
-            self (NeuralNetwork): Rete neurale.
             input_data (ndarray): Dati di input.
 
         Returns:
@@ -242,10 +246,9 @@ class NeuralNetwork:
 
     def gradient_descent(self, learning_rate, weights_der, biases_der):
         """
-        Aggiorna i pesi e i bias della rete neurale utilizzando il gradiente discendente.
+        Aggiorna i pesi e i bias della rete neurale utilizzando la discesa del gradiente.
 
         Args:
-            self (NeuralNetwork): Rete neurale da aggiornare.
             learning_rate (float): Tasso di apprendimento per controllare la dimensione dei passi dell'aggiornamento.
             weights_der (list): Lista dei gradienti dei pesi per ciascuno strato.
             biases_der (list): Lista dei gradienti dei bias per ciascuno strato.
@@ -267,7 +270,6 @@ class NeuralNetwork:
         Esegue la back-propagation per calcolare i gradienti dei pesi e dei bias.
 
         Args:
-            self (NeuralNetwork): La rete neurale.
             input_activations (list of numpy.ndarray): Le attivazioni di input di ciascun layer.
             layer_outputs (list of numpy.ndarray): Gli output di ciascun layer.
             target (numpy.ndarray): Il target desiderato per l'output della rete.
@@ -311,7 +313,6 @@ class NeuralNetwork:
         Calcola l'accuratezza della rete neurale su un insieme di dati di input e target specificato.
 
         Args:
-            self (NeuralNetwork): Oggetto della rete neurale.
             input_data (numpy.ndarray): Dati di input su cui valutare la rete.
             labels (numpy.ndarray): Target desiderati per i dati di input.
 
@@ -321,19 +322,152 @@ class NeuralNetwork:
         output = self.forward_propagation(input_data)
         return ut.format_percentage(ut.compute_accuracy(output, labels))
 
+    def rprops(self, weights_der, biases_der, weights_delta, biases_delta, weights_der_prev, biases_der_prev,
+               train_error, train_error_prev, eta_pos=1.2, eta_neg=0.5, delta_max=50, delta_min=0.00001,
+               rprop_type=RPropType.STANDARD):
+        """
+        Funzione RProp per l'aggiornamento dei pesi per reti multistrato. Implementa la versione standard e le tre varianti
+        contenute nell'articolo "Empirical evaluation of the improved Rprop learning algorithms". Le varianti vengono
+        implementate tramite l'attributo rprop_type.
+
+        Args:
+            weights_der (list): Lista dei gradienti dei pesi per ciascuno strato.
+            biases_der (list): Lista dei gradienti dei bias per ciascuno strato.
+            weights_delta (list): Lista dei delta dei pesi per ciascuno strato.
+            biases_delta (list): Lista dei delta dei bias per ciascuno strato.
+            weights_der_prev (list): Lista dei gradienti dei pesi della precedente iterazione.
+            biases_der_prev (list): Lista dei gradienti dei bias della precedente iterazione.
+            eta_pos (float): Fattore di aggiornamento dei delta per derivata positiva (default: 1.2).
+            eta_neg (float): Fattore di aggiornamento dei delta per derivata negativa (default: 0.5).
+            delta_max (float): Limite superiore per il delta (default: 50).
+            delta_min (float): Limite inferiore per il delta (default: 0.00001).
+            train_error (float): Errore dell'epoca corrente.
+            train_error_prev (float): Errore dell'epoca precedente.
+            rprop_type (RPropType): Tipo di RProp da utilizzare (default: RpropType.STANDARD).
+
+        Returns:
+            NeuralNetwork: Rete neurale aggiornata con il metodo RProp.
+        """
+        for layer in range(len(self.layers_weights)):
+            layer_weights = self.layers_weights[layer]
+            layer_biases = self.layers_biases[layer]
+
+            # Inizializzazione delle liste dei delta per i pesi e i bias per l'attuale strato
+            layer_weights_difference = [[0] * len(row) for row in weights_delta[layer]]
+            layer_biases_difference = [[0] * len(row) for row in biases_delta[layer]]
+            layer_weights_difference_prev = [[0] * len(row) for row in weights_delta[layer]]
+            layer_biases_difference_prev = [[0] * len(row) for row in biases_delta[layer]]
+
+            for num_rows in range(len(weights_der[layer])):
+                for num_cols in range(len(weights_der[layer][num_rows])):
+                    weight_der_product = weights_der_prev[layer][num_rows][num_cols] * weights_der[layer][num_rows][
+                        num_cols]
+
+                    if weight_der_product > 0:
+                        # Calcolo della nuova dimensione del delta per i pesi
+                        weights_delta[layer][num_rows][num_cols] = min(
+                            weights_delta[layer][num_rows][num_cols] * eta_pos,
+                            delta_max)
+
+                        # Aggiornamento della differenza del peso
+                        layer_weights_difference[num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][num_cols])
+                                                                         * weights_delta[layer][num_rows][num_cols])
+
+                    elif weight_der_product < 0:
+                        # Calcolo della nuova dimensione del delta per i pesi
+                        weights_delta[layer][num_rows][num_cols] = max(weights_delta[layer][num_rows][num_cols] *
+                                                                       eta_neg, delta_min)
+
+                        if rprop_type == RPropType.STANDARD or rprop_type == RPropType.IRPROP:
+                            # Aggiornamento della differenza del peso
+                            layer_weights_difference[num_rows][num_cols] = -(
+                                    np.sign(weights_der[layer][num_rows][num_cols]) *
+                                    weights_delta[layer][num_rows][num_cols])
+                        else:
+                            if rprop_type == RPropType.IRPROP_PLUS and train_error <= train_error_prev:
+                                # Aggiornamento della differenza del peso
+                                layer_weights_difference[num_rows][num_cols] = 0
+                            else:
+                                # Aggiornamento della differenza del peso
+                                layer_weights_difference[num_rows][num_cols] = -layer_weights_difference_prev[num_rows][
+                                    num_cols]
+
+                        if rprop_type != RPropType.STANDARD:
+                            # Aggiornamento della derivata del peso
+                            weights_der[layer][num_rows][num_cols] = 0
+
+                    else:
+                        # Aggiornamento della differenza del peso
+                        layer_weights_difference[num_rows][num_cols] = -(
+                                    np.sign(weights_der[layer][num_rows][num_cols]) *
+                                    weights_delta[layer][num_rows][num_cols])
+
+                    # Aggiornamento dei pesi
+                    layer_weights[num_rows][num_cols] += layer_weights_difference[num_rows][num_cols]
+
+                    # Aggiornamento dei gradienti dei bias precedenti
+                    weights_der_prev[layer][num_rows][num_cols] = weights_der[layer][num_rows][num_cols]
+
+                    layer_weights_difference_prev[num_rows][num_cols] = layer_weights_difference[num_rows][num_cols]
+
+                biases_der_product = biases_der_prev[layer][num_rows][0] * biases_der[layer][num_rows][0]
+
+                if biases_der_product > 0:
+                    # Calcolo della nuova dimensione del delta per i bias
+                    biases_delta[layer][num_rows][0] = min(biases_delta[layer][num_rows][0] * eta_pos, delta_max)
+
+                    # Aggiornamento della differenza del bias
+                    layer_biases_difference[num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
+                                                             biases_delta[layer][num_rows][0])
+
+                elif biases_der_product < 0:
+                    # Calcolo della nuova dimensione del delta per i bias
+                    biases_delta[layer][num_rows][0] = max(biases_delta[layer][num_rows][0] * eta_neg, delta_min)
+
+                    if rprop_type == RPropType.STANDARD or rprop_type == RPropType.IRPROP:
+                        # Aggiornamento del delta del bias
+                        layer_biases_difference[num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
+                                                                 biases_delta[layer][num_rows][0])
+                    else:
+                        if rprop_type == RPropType.IRPROP_PLUS and train_error <= train_error_prev:
+                            # Aggiornamento della differenza del bias
+                            layer_biases_difference[num_rows][0] = 0
+
+                        else:
+                            # Aggiornamento della differenza del bias
+                            layer_biases_difference[num_rows][0] = -layer_biases_difference_prev[num_rows][0]
+
+                    if rprop_type != RPropType.STANDARD:
+                        # Aggiornamento della derivata del bias
+                        biases_der[layer][num_rows][0] = 0
+
+                else:
+                    # Aggiornamento della differenza del bias
+                    layer_biases_difference[num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
+                                                             biases_delta[layer][num_rows][0])
+
+                # Aggiornamento dei bias
+                layer_biases[num_rows][0] += layer_biases_difference[num_rows][0]
+
+                # Aggiornamento dei gradienti dei bias precedenti
+                biases_der_prev[layer][num_rows][0] = biases_der[layer][num_rows][0]
+
+                layer_biases_difference_prev[num_rows][0] = layer_biases_difference[num_rows][0]
+
+        return self
+
     def train_neural_network(self, train_in, train_labels, validation_in, validation_labels, epochs=100,
                              learning_rate=0.1, rprop_type=RPropType.STANDARD):
         """
         Processo di apprendimento per la rete neurale.
 
         Args:
-            self (NeuralNetwork): Rete neurale da addestrare.
             train_in (numpy.ndarray): Dati di input per il training.
             train_labels (numpy.ndarray): Target desiderati per i dati di input di training.
             validation_in (numpy.ndarray): Dati di input per la validazione.
             validation_labels (numpy.ndarray): Target desiderati per i dati di input di validazione.
-            epochs (int, optional): Numero massimo di epoche per il training. Default: 100.
-            learning_rate (float, optional): Tasso di apprendimento per il gradiente discendente. Default: 0.1.
+            epochs (int, optional): Numero massimo di epoche per il training (default: 100).
+            learning_rate (float, optional): Tasso di apprendimento per il gradiente discendente (default: 0.1).
             rprop_type (RPropType): Tipo di RProp da utilizzare (default: RpropType.STANDARD).
 
         Returns:
@@ -357,6 +491,8 @@ class NeuralNetwork:
         train_error = error_function(train_net_out, train_labels)
         train_errors.append(train_error)
 
+        train_error_prev = 999999
+
         # Inizializzazione best_net
         validation_net_out = self.forward_propagation(validation_in)
         val_error = error_function(validation_net_out, validation_labels)
@@ -369,17 +505,16 @@ class NeuralNetwork:
         validation_accuracy = ut.compute_accuracy(validation_net_out, validation_labels)
         train_accuracies.append(train_accuracy)
         validation_accuracies.append(validation_accuracy)
-        print(f'\n0/{epochs}\n'
-              f'Training Accuracy: {ut.format_percentage(train_accuracy)}%,\n'
-              f'Validation Accuracy: {ut.format_percentage(validation_accuracy)}%\n')
+
+        print(f'\nEpoca: 0/{epochs}    rProp utilizzata: {rprop_type}\n'
+              f'    Training Accuracy: {ut.format_percentage(train_accuracy)}%,\n'
+              f'    Validation Accuracy: {ut.format_percentage(validation_accuracy)}%\n')
 
         # Inizio fase di apprendimento
         for epoch in range(epochs):
             # Gradient descent e Back-propagation
             layer_out, layer_act_fun_der = ut.compute_gradients(self, train_in)
             weights_der, biases_der = self.back_propagation(layer_act_fun_der, layer_out, train_labels, error_function)
-
-            train_error_prev = 99999
 
             if epoch == 0:
                 # Aggiornamento pesi tramite discesa del gradiente
@@ -393,11 +528,10 @@ class NeuralNetwork:
                 biases_der_prev = deepcopy(biases_der)
             else:
                 # Aggiornamento della rete utilizzando la funzione RProp
-                lf.rprops(self, weights_der, biases_der, weights_delta, biases_delta,
-                               weights_der_prev, biases_der_prev, train_error, train_error_prev, rprop_type=rprop_type)
+                self.rprops(weights_der, biases_der, weights_delta, biases_delta, weights_der_prev, biases_der_prev,
+                            train_error, train_error_prev, rprop_type=rprop_type)
 
-            if epoch > 0:
-                train_error_prev = train_error
+            train_error_prev = train_error
 
             # Forward propagation per training set
             train_net_out = self.forward_propagation(train_in)
@@ -418,9 +552,9 @@ class NeuralNetwork:
             validation_accuracy = ut.compute_accuracy(validation_net_out, validation_labels)
             train_accuracies.append(train_accuracy)
             validation_accuracies.append(validation_accuracy)
-            print(f'\n{epoch + 1}/{epochs}\n'
-                  f'Training Accuracy: {ut.format_percentage(train_accuracy)}%,\n'
-                  f'Validation Accuracy: {ut.format_percentage(validation_accuracy)}%\n')
+            print(f'\nEpoca: {epoch + 1}/{epochs}   rProp utilizzata: {rprop_type}\n'
+                  f'    Training Accuracy: {ut.format_percentage(train_accuracy)}%,\n'
+                  f'    Validation Accuracy: {ut.format_percentage(validation_accuracy)}%\n')
 
         ut.copy_params_in_network(self, best_net)
 
