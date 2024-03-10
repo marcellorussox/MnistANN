@@ -38,44 +38,6 @@ def copy_params_in_network(dst_net, src_net):
     dst_net.hidden_activation_functions = src_net.hidden_activation_functions
 
 
-def compute_gradients(net, input_data):
-    """
-    Calcola le derivate e gli output dei neuroni della rete.
-
-    Args:
-        net (NeuralNetwork): La rete neurale.
-        input_data (numpy.ndarray): I dati di input.
-
-    Returns:
-        tuple: Una tupla contenente gli output dei neuroni di ogni layer e le derivate delle funzioni di attivazione.
-    """
-    # Estrazione dei parametri della rete
-    weights = net.layers_weights
-    biases = net.layers_biases
-    activation_functions = net.hidden_activation_functions
-
-    num_layers = len(net.layers_weights)
-
-    layer_outputs = [input_data]  # Inizializzazione con l'input
-
-    # Lista per memorizzare le derivate delle funzioni di attivazione
-    activation_derivatives = []
-
-    for layer_index in range(num_layers):
-        # Trasformazione lineare tra i pesi e l'input del neurone corrente
-        result = np.dot(weights[layer_index], layer_outputs[layer_index]) + biases[layer_index]
-        layer_output = activation_functions[layer_index](result)  # Output del layer dopo l'attivazione
-
-        # Calcolo della derivata della funzione di attivazione
-        derivative_activation = activation_functions[layer_index](result, der=True)[1]
-
-        # Memorizzazione dell'output del layer e della sua derivata di attivazione
-        layer_outputs.append(layer_output)
-        activation_derivatives.append(derivative_activation)
-
-    return layer_outputs, activation_derivatives
-
-
 def compute_accuracy(output, labels):
     """
     Calcola l'accuratezza della rete neurale confrontando le previsioni con i target desiderati.

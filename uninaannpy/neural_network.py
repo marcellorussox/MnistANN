@@ -219,6 +219,42 @@ class NeuralNetwork:
         """
         return deepcopy(self)
 
+    def compute_gradients(self, input_data):
+        """
+        Calcola le derivate e gli output dei neuroni della rete.
+
+        Args:
+            input_data (numpy.ndarray): I dati di input.
+
+        Returns:
+            tuple: Una tupla contenente gli output dei neuroni di ogni layer e le derivate delle funzioni di attivazione.
+        """
+        # Estrazione dei parametri della rete
+        weights = self.layers_weights
+        biases = self.layers_biases
+        activation_functions = self.hidden_activation_functions
+
+        num_layers = len(self.layers_weights)
+
+        layer_outputs = [input_data]  # Inizializzazione con l'input
+
+        # Lista per memorizzare le derivate delle funzioni di attivazione
+        activation_derivatives = []
+
+        for layer in range(num_layers):
+            # Trasformazione lineare tra i pesi e l'input del neurone corrente
+            result = np.dot(weights[layer], layer_outputs[layer]) + biases[layer]
+            layer_output = activation_functions[layer](result)  # Output del layer dopo l'attivazione
+
+            # Calcolo della derivata della funzione di attivazione
+            derivative_activation = activation_functions[layer](result, der=True)[1]
+
+            # Memorizzazione dell'output del layer e della sua derivata di attivazione
+            layer_outputs.append(layer_output)
+            activation_derivatives.append(derivative_activation)
+
+        return layer_outputs, activation_derivatives
+
     def forward_propagation(self, input_data):
         """
         Esegue la propagazione in avanti attraverso la rete neurale.
@@ -398,9 +434,8 @@ class NeuralNetwork:
 
                     else:
                         # Aggiornamento della differenza del peso
-                        layer_weights_difference[num_rows][num_cols] = -(
-                                    np.sign(weights_der[layer][num_rows][num_cols]) *
-                                    weights_delta[layer][num_rows][num_cols])
+                        layer_weights_difference[num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][num_cols])
+                                                                         * weights_delta[layer][num_rows][num_cols])
 
                     # Aggiornamento dei pesi
                     layer_weights[num_rows][num_cols] += layer_weights_difference[num_rows][num_cols]
@@ -513,7 +548,7 @@ class NeuralNetwork:
         # Inizio fase di apprendimento
         for epoch in range(epochs):
             # Gradient descent e Back-propagation
-            layer_out, layer_act_fun_der = ut.compute_gradients(self, train_in)
+            layer_out, layer_act_fun_der = self.compute_gradients(train_in)
             weights_der, biases_der = self.back_propagation(layer_act_fun_der, layer_out, train_labels, error_function)
 
             if epoch == 0:
