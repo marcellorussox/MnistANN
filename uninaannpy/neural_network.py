@@ -358,6 +358,13 @@ class NeuralNetwork:
         output = self.forward_propagation(input_data)
         return ut.format_percentage(ut.compute_accuracy(output, labels))
 
+    def print_accuracies(self, title, test_in, test_labels, train_in, train_labels):
+        print(title)
+        net_accuracy_test = self.network_accuracy(test_in, test_labels)
+        print(f'Test accuracy: {net_accuracy_test}%')
+        net_accuracy_training = self.network_accuracy(train_in, train_labels)
+        print(f'Train accuracy: {net_accuracy_training}%')
+
     def rprops(self, weights_der, biases_der, weights_delta, biases_delta, weights_der_prev, biases_der_prev,
                layer_weights_difference_prev, layer_biases_difference_prev, train_error, train_error_prev, eta_pos=1.2,
                eta_neg=0.5, delta_max=50, delta_min=0.00001, rprop_type=RPropType.STANDARD):
