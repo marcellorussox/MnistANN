@@ -359,8 +359,8 @@ class NeuralNetwork:
         return ut.format_percentage(ut.compute_accuracy(output, labels))
 
     def rprops(self, weights_der, biases_der, weights_delta, biases_delta, weights_der_prev, biases_der_prev,
-               train_error, train_error_prev, eta_pos=1.2, eta_neg=0.5, delta_max=50, delta_min=0.00001,
-               rprop_type=RPropType.STANDARD):
+               layer_weights_difference_prev, layer_biases_difference_prev, train_error, train_error_prev, eta_pos=1.2,
+               eta_neg=0.5, delta_max=50, delta_min=0.00001, rprop_type=RPropType.STANDARD):
         """
         Funzione RProp per l'aggiornamento dei pesi per reti multistrato. Implementa la versione standard e le tre varianti
         contenute nell'articolo "Empirical evaluation of the improved Rprop learning algorithms". Le varianti vengono
@@ -373,26 +373,27 @@ class NeuralNetwork:
             biases_delta (list): Lista dei delta dei bias per ciascuno strato.
             weights_der_prev (list): Lista dei gradienti dei pesi della precedente iterazione.
             biases_der_prev (list): Lista dei gradienti dei bias della precedente iterazione.
+            layer_weights_difference_prev (list): Lista delle differenze dei pesi della precedente iterazione.
+            layer_biases_difference_prev (list): Lista delle differenze dei bias della precedente iterazione.
+            train_error (float): Errore dell'epoca corrente.
+            train_error_prev (float): Errore dell'epoca precedente.
             eta_pos (float): Fattore di aggiornamento dei delta per derivata positiva (default: 1.2).
             eta_neg (float): Fattore di aggiornamento dei delta per derivata negativa (default: 0.5).
             delta_max (float): Limite superiore per il delta (default: 50).
             delta_min (float): Limite inferiore per il delta (default: 0.00001).
-            train_error (float): Errore dell'epoca corrente.
-            train_error_prev (float): Errore dell'epoca precedente.
             rprop_type (RPropType): Tipo di RProp da utilizzare (default: RpropType.STANDARD).
 
         Returns:
             NeuralNetwork: Rete neurale aggiornata con il metodo RProp.
         """
+
+        # Inizializzazione delle liste dei delta per i pesi e i bias per l'attuale strato
+        layer_weights_difference = layer_weights_difference_prev
+        layer_biases_difference = layer_biases_difference_prev
+
         for layer in range(len(self.layers_weights)):
             layer_weights = self.layers_weights[layer]
             layer_biases = self.layers_biases[layer]
-
-            # Inizializzazione delle liste dei delta per i pesi e i bias per l'attuale strato
-            layer_weights_difference = [[0] * len(row) for row in weights_delta[layer]]
-            layer_biases_difference = [[0] * len(row) for row in biases_delta[layer]]
-            layer_weights_difference_prev = [[0] * len(row) for row in weights_delta[layer]]
-            layer_biases_difference_prev = [[0] * len(row) for row in biases_delta[layer]]
 
             for num_rows in range(len(weights_der[layer])):
                 for num_cols in range(len(weights_der[layer][num_rows])):
@@ -401,12 +402,11 @@ class NeuralNetwork:
 
                     if weight_der_product > 0:
                         # Calcolo della nuova dimensione del delta per i pesi
-                        weights_delta[layer][num_rows][num_cols] = min(
-                            weights_delta[layer][num_rows][num_cols] * eta_pos,
-                            delta_max)
+                        weights_delta[layer][num_rows][num_cols] = min(weights_delta[layer][num_rows][num_cols] *
+                                                                       eta_pos, delta_max)
 
                         # Aggiornamento della differenza del peso
-                        layer_weights_difference[num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][num_cols])
+                        layer_weights_difference[layer][num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][num_cols])
                                                                          * weights_delta[layer][num_rows][num_cols])
 
                     elif weight_der_product < 0:
@@ -416,16 +416,16 @@ class NeuralNetwork:
 
                         if rprop_type == RPropType.STANDARD or rprop_type == RPropType.IRPROP:
                             # Aggiornamento della differenza del peso
-                            layer_weights_difference[num_rows][num_cols] = -(
-                                    np.sign(weights_der[layer][num_rows][num_cols]) *
-                                    weights_delta[layer][num_rows][num_cols])
+                            layer_weights_difference[layer][num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][
+                                                                                         num_cols]) *
+                                                                             weights_delta[layer][num_rows][num_cols])
                         else:
                             if rprop_type == RPropType.IRPROP_PLUS and train_error <= train_error_prev:
                                 # Aggiornamento della differenza del peso
-                                layer_weights_difference[num_rows][num_cols] = 0
+                                layer_weights_difference[layer][num_rows][num_cols] = 0
                             else:
                                 # Aggiornamento della differenza del peso
-                                layer_weights_difference[num_rows][num_cols] = -layer_weights_difference_prev[num_rows][
+                                layer_weights_difference[layer][num_rows][num_cols] = -layer_weights_difference_prev[layer][num_rows][
                                     num_cols]
 
                         if rprop_type != RPropType.STANDARD:
@@ -434,16 +434,16 @@ class NeuralNetwork:
 
                     else:
                         # Aggiornamento della differenza del peso
-                        layer_weights_difference[num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][num_cols])
+                        layer_weights_difference[layer][num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][num_cols])
                                                                          * weights_delta[layer][num_rows][num_cols])
 
                     # Aggiornamento dei pesi
-                    layer_weights[num_rows][num_cols] += layer_weights_difference[num_rows][num_cols]
+                    layer_weights[num_rows][num_cols] += layer_weights_difference[layer][num_rows][num_cols]
 
                     # Aggiornamento dei gradienti dei bias precedenti
                     weights_der_prev[layer][num_rows][num_cols] = weights_der[layer][num_rows][num_cols]
 
-                    layer_weights_difference_prev[num_rows][num_cols] = layer_weights_difference[num_rows][num_cols]
+                    layer_weights_difference_prev[layer][num_rows][num_cols] = layer_weights_difference[layer][num_rows][num_cols]
 
                 biases_der_product = biases_der_prev[layer][num_rows][0] * biases_der[layer][num_rows][0]
 
@@ -452,7 +452,7 @@ class NeuralNetwork:
                     biases_delta[layer][num_rows][0] = min(biases_delta[layer][num_rows][0] * eta_pos, delta_max)
 
                     # Aggiornamento della differenza del bias
-                    layer_biases_difference[num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
+                    layer_biases_difference[layer][num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
                                                              biases_delta[layer][num_rows][0])
 
                 elif biases_der_product < 0:
@@ -461,16 +461,16 @@ class NeuralNetwork:
 
                     if rprop_type == RPropType.STANDARD or rprop_type == RPropType.IRPROP:
                         # Aggiornamento del delta del bias
-                        layer_biases_difference[num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
+                        layer_biases_difference[layer][num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
                                                                  biases_delta[layer][num_rows][0])
                     else:
                         if rprop_type == RPropType.IRPROP_PLUS and train_error <= train_error_prev:
                             # Aggiornamento della differenza del bias
-                            layer_biases_difference[num_rows][0] = 0
+                            layer_biases_difference[layer][num_rows][0] = 0
 
                         else:
                             # Aggiornamento della differenza del bias
-                            layer_biases_difference[num_rows][0] = -layer_biases_difference_prev[num_rows][0]
+                            layer_biases_difference[layer][num_rows][0] = -layer_biases_difference_prev[layer][num_rows][0]
 
                     if rprop_type != RPropType.STANDARD:
                         # Aggiornamento della derivata del bias
@@ -478,18 +478,18 @@ class NeuralNetwork:
 
                 else:
                     # Aggiornamento della differenza del bias
-                    layer_biases_difference[num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
+                    layer_biases_difference[layer][num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
                                                              biases_delta[layer][num_rows][0])
 
                 # Aggiornamento dei bias
-                layer_biases[num_rows][0] += layer_biases_difference[num_rows][0]
+                layer_biases[num_rows][0] += layer_biases_difference[layer][num_rows][0]
 
                 # Aggiornamento dei gradienti dei bias precedenti
                 biases_der_prev[layer][num_rows][0] = biases_der[layer][num_rows][0]
 
-                layer_biases_difference_prev[num_rows][0] = layer_biases_difference[num_rows][0]
+                layer_biases_difference_prev[layer][num_rows][0] = layer_biases_difference[layer][num_rows][0]
 
-        return self
+        return layer_weights_difference, layer_biases_difference
 
     def train_neural_network(self, train_in, train_labels, validation_in, validation_labels, epochs=100,
                              learning_rate=0.1, rprop_type=RPropType.STANDARD):
@@ -519,7 +519,8 @@ class NeuralNetwork:
         error_function = self.error_function
 
         # Inizializzazione delta e derivate precedenti
-        weights_delta, biases_delta, weights_der_prev, biases_der_prev = None, None, None, None
+        (weights_delta, biases_delta, weights_der_prev, biases_der_prev, layer_weights_difference,
+         layer_biases_difference) = None, None, None, None, None, None
 
         # Inizializzazione training
         train_net_out = self.forward_propagation(train_in)
@@ -557,14 +558,20 @@ class NeuralNetwork:
 
                 # Inizializzazione dei pesi e dei bias per la funzione RProp
                 weights_delta = [[[0.1 for _ in row] for row in sub_list] for sub_list in weights_der]
+                layer_weights_difference = [[[0.1 for _ in row] for row in sub_list] for sub_list in weights_der]
+
                 biases_delta = [[[0.1 for _ in row] for row in sub_list] for sub_list in biases_der]
+                layer_biases_difference = [[[0.1 for _ in row] for row in sub_list] for sub_list in biases_der]
 
                 weights_der_prev = deepcopy(weights_der)
                 biases_der_prev = deepcopy(biases_der)
             else:
                 # Aggiornamento della rete utilizzando la funzione RProp
-                self.rprops(weights_der, biases_der, weights_delta, biases_delta, weights_der_prev, biases_der_prev,
-                            train_error, train_error_prev, rprop_type=rprop_type)
+                (layer_weights_difference,
+                 layer_biases_difference) = self.rprops(weights_der, biases_der, weights_delta, biases_delta,
+                                                        weights_der_prev, biases_der_prev, layer_weights_difference,
+                                                        layer_biases_difference, train_error, train_error_prev,
+                                                        rprop_type=rprop_type)
 
             train_error_prev = train_error
 
