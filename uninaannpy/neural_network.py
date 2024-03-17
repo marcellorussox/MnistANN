@@ -221,7 +221,7 @@ class NeuralNetwork:
 
     def compute_gradients(self, input_data):
         """
-        Calcola le derivate e gli output dei neuroni della rete.
+        Calcola le derivate e gli output dei neuroni della rete per la backpropagation.
 
         Args:
             input_data (numpy.ndarray): I dati di input.
@@ -247,7 +247,7 @@ class NeuralNetwork:
             layer_output = activation_functions[layer](result)  # Output del layer dopo l'attivazione
 
             # Calcolo della derivata della funzione di attivazione
-            derivative_activation = activation_functions[layer](result, der=True)[1]
+            derivative_activation = activation_functions[layer](result, der=True)
 
             # Memorizzazione dell'output del layer e della sua derivata di attivazione
             layer_outputs.append(layer_output)
@@ -324,10 +324,12 @@ class NeuralNetwork:
 
         # Calcolo dei gradienti dei pesi e dei bias per ciascuno strato, partendo dallo strato di output
         for layer in range(num_layers - 1, -1, -1):
+            delta = []
+
             # Calcolo del delta per lo strato corrente
             if layer == num_layers - 1:
                 # Calcolo del delta dell'ultimo strato
-                output_error_derivative = error_function(layer_outputs[-1], target, 1)
+                output_error_derivative = error_function(layer_outputs[-1], target, der=True)
                 delta = [input_activations[-1] * output_error_derivative]
             else:
                 # Calcolo del delta per gli strati intermedi
