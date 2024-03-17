@@ -1,15 +1,15 @@
 import numpy as np
 
 
-def sum_of_squares(net_output, labels, der=False):
+def sum_of_squares(net_output, labels, der=False, lambda_reg=0.1):
     """
     Calcola la funzione di somma dei quadrati o la sua derivata.
 
     Args:
         net_output (numpy.ndarray): Vettore delle previsioni del modello.
         labels (numpy.ndarray): Vettore dei valori target.
-        der (bool, optional): Se è False, calcola la funzione di somma dei quadrati, altrimenti calcola
-            la derivata. Default è False.
+        der (bool, optional): Se è False, calcola la funzione di somma dei quadrati, altrimenti calcola la derivata. Default è False.
+        lambda_reg (float, optional): Parametro di regolarizzazione L2. Default è 0.1.
 
     Returns:
         float: Se compute_derivative=False, restituisce il valore della funzione di somma dei quadrati.
@@ -19,7 +19,7 @@ def sum_of_squares(net_output, labels, der=False):
     if not der:
         return 0.5 * np.sum(np.power(z, 2))
     else:
-        return z
+        return z + lambda_reg * net_output
 
 
 def softmax(net_output):
