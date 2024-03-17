@@ -247,7 +247,7 @@ class NeuralNetwork:
             layer_output = activation_functions[layer](result)  # Output del layer dopo l'attivazione
 
             # Calcolo della derivata della funzione di attivazione
-            derivative_activation = activation_functions[layer](result, der=True)
+            derivative_activation = activation_functions[layer](result, der=True)[1]
 
             # Memorizzazione dell'output del layer e della sua derivata di attivazione
             layer_outputs.append(layer_output)
@@ -324,8 +324,6 @@ class NeuralNetwork:
 
         # Calcolo dei gradienti dei pesi e dei bias per ciascuno strato, partendo dallo strato di output
         for layer in range(num_layers - 1, -1, -1):
-            delta = []
-
             # Calcolo del delta per lo strato corrente
             if layer == num_layers - 1:
                 # Calcolo del delta dell'ultimo strato
