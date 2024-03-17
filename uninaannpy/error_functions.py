@@ -45,7 +45,7 @@ def softmax(net_output):
     return z
 
 
-def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15):
+def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15, reg_lambda=0.01):
     """
     Calcola la cross-entropy tra i valori previsti net_output e i valori target labels utilizzando la funzione softmax.
 
@@ -54,9 +54,10 @@ def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15):
         labels (numpy.ndarray): Array contenente i valori target.
         der (bool, optional): Indica se calcolare la derivata della cross-entropy. Default è False.
         epsilon (float, optional): Valore utilizzato per evitare il log(0). Default è 1e-15.
+        reg_lambda (float, optional): Parametro di regolarizzazione L2. Default è 0.01.
 
     Returns:
-        numpy.ndarray: La cross-entropy tra net_output e labels se der è False, altrimenti la differenza tra softmax_output e labels.
+        numpy.ndarray: La cross-entropy tra net_output e labels se der è False, altrimenti la sua derivata..
     """
     softmax_output = softmax(net_output)
 
@@ -66,7 +67,7 @@ def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15):
     if not der:
         return -np.sum(labels * np.log(softmax_output))
     else:
-        return softmax_output - labels
+        return (softmax_output - labels) + reg_lambda * net_output
 
 
 def cross_entropy(net_output, labels, der=False, epsilon=1e-15):
