@@ -558,10 +558,10 @@ class NeuralNetwork:
 
                 # Inizializzazione dei pesi e dei bias per la funzione RProp
                 weights_delta = [[[0.1 for _ in row] for row in sub_list] for sub_list in weights_der]
-                layer_weights_difference = [[[0.1 for _ in row] for row in sub_list] for sub_list in weights_der]
+                layer_weights_difference = [[[0. for _ in row] for row in sub_list] for sub_list in weights_der]
 
                 biases_delta = [[[0.1 for _ in row] for row in sub_list] for sub_list in biases_der]
-                layer_biases_difference = [[[0.1 for _ in row] for row in sub_list] for sub_list in biases_der]
+                layer_biases_difference = [[[0. for _ in row] for row in sub_list] for sub_list in biases_der]
 
                 weights_der_prev = deepcopy(weights_der)
                 biases_der_prev = deepcopy(biases_der)
