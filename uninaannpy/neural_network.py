@@ -247,7 +247,7 @@ class NeuralNetwork:
             layer_output = activation_functions[layer](result)  # Output del layer dopo l'attivazione
 
             # Calcolo della derivata della funzione di attivazione
-            derivative_activation = activation_functions[layer](result, der=True)[1]
+            derivative_activation = activation_functions[layer](result)
 
             # Memorizzazione dell'output del layer e della sua derivata di attivazione
             layer_outputs.append(layer_output)

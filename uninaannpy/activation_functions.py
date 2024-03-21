@@ -16,7 +16,7 @@ def identity(x, der=False):
     if not der:
         return x
     else:
-        return x, 1  # La derivata della funzione identità è sempre 1
+        return 1  # La derivata della funzione identità è sempre 1
 
 
 def tanh(x, der=False):
@@ -35,7 +35,7 @@ def tanh(x, der=False):
     if not der:
         return y
     else:
-        return y, 1 - y**2  # Derivata della tangente iperbolica
+        return 1 - y**2  # Derivata della tangente iperbolica
 
 
 def relu(x, der=0):
@@ -53,7 +53,7 @@ def relu(x, der=0):
     if not der:
         return np.maximum(0, x)
     else:
-        return np.maximum(0, x), np.where(x > 0, 1, 0)  # Derivata della funzione ReLU
+        return np.where(x > 0, 1, 0)  # Derivata della funzione ReLU
 
 
 def leaky_relu(x, der=False, alpha=0.01):
@@ -75,4 +75,4 @@ def leaky_relu(x, der=False, alpha=0.01):
     if not der:
         return np.where(x > 0, x, alpha * x)
     else:
-        return np.where(x > 0, x, alpha * x), np.where(x > 0, 1, alpha)  # Derivata della funzione Leaky ReLU
+        return np.where(x > 0, 1, alpha)  # Derivata della funzione Leaky ReLU
