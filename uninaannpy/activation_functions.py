@@ -7,11 +7,10 @@ def identity(x, der=False):
 
     Args:
         x (float): Il valore di input.
-        der (bool, optional): Se è False, calcola la funzione identità, altrimenti calcola anche la derivata. Default è False.
+        der (bool, optional): Se è False, calcola la funzione identità, altrimenti calcola la derivata. Default è False.
 
     Returns:
-        float: Se der=False, restituisce il valore di input x.
-        tuple: Se der!=False, restituisce una tupla contenente il valore di input x e la derivata, che è sempre 1.
+        float: Se der=False, restituisce il valore di input x, altrimenti restituisce la sua derivata.
     """
     if not der:
         return x
@@ -28,8 +27,7 @@ def tanh(x, der=False):
         der (bool, optional): Se è False, calcola la tangente iperbolica, altrimenti calcola la derivata. Default è False.
 
     Returns:
-        float: Se der=False, restituisce il valore della tangente iperbolica di x.
-        float: Se der!=False, restituisce il valore della derivata della tangente iperbolica in x.
+        float: Se der=False, restituisce il valore della tangente iperbolica di x, altrimenti restituisce la sua derivata.
     """
     y = np.tanh(x)
     if not der:
@@ -47,8 +45,7 @@ def relu(x, der=0):
         der (bool, optional): Se è False, calcola la funzione ReLU, altrimenti calcola la derivata. Default è False.
 
     Returns:
-        float: Se der=False, restituisce il valore della funzione ReLU di x.
-        tuple: Se der!=False, restituisce una tupla contenente il valore della funzione ReLU di x e la derivata.
+        float: Se der=False, restituisce il valore della funzione ReLU di x, altrimenti restituisce la sua derivata.
     """
     if not der:
         return np.maximum(0, x)
@@ -66,8 +63,7 @@ def leaky_relu(x, der=False, alpha=0.01):
         alpha (float, optional): Il parametro alpha che determina la pendenza della parte negativa della funzione. Default è 0.01.
 
     Returns:
-        float: Se der=False, restituisce il valore della funzione Leaky ReLU di x.
-        tuple: Se der!=False, restituisce una tupla contenente il valore della funzione Leaky ReLU di x e la derivata.
+        float: Se der=False, restituisce il valore della funzione Leaky ReLU di x, altrimenti restituisce la sua derivata.
 
     Raises:
         ValueError: Se il valore di der non è valido.
