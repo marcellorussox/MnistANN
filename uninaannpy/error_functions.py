@@ -57,7 +57,7 @@ def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15, reg_lamb
         reg_lambda (float, optional): Parametro di regolarizzazione L2. Default è 0.01.
 
     Returns:
-        numpy.ndarray: La cross-entropy tra net_output e labels se der è False, altrimenti la sua derivata..
+        numpy.ndarray: La cross-entropy tra net_output e labels se der è False, altrimenti la sua derivata.
     """
     softmax_output = softmax(net_output)
 
@@ -82,7 +82,7 @@ def cross_entropy(net_output, labels, der=False, epsilon=1e-15, lambda_reg=0.1):
         lambda_reg (float, optional): Parametro di regolarizzazione L2. Default è 0.1.
 
     Returns:
-        numpy.ndarray: La cross-entropy tra l'output della rete e le etichette fornite, o la sua derivata se der=True.
+        numpy.ndarray: La cross-entropy tra l'output della rete e le etichette fornite se der è False, altrimenti la sua derivata.
     """
     # Aggiunta di epsilon per evitare log(0)
     net_output = np.clip(net_output, epsilon, 1 - epsilon)
