@@ -47,7 +47,7 @@ def compute_accuracy(output, labels):
         labels (numpy.ndarray): Array contenente i target desiderati.
 
     Returns:
-        float: Percentuale di predizioni corrette rispetto ai target desiderati.
+        float: Rapporto tra predizioni corrette e target desiderati.
     """
     num_samples = labels.shape[1]
 
