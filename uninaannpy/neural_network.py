@@ -61,7 +61,7 @@ class NeuralNetwork:
 
         # Inizializzazione dei pesi e dei bias per gli strati nascosti
         for layer in range(1, self.number_of_hidden_layers):
-            self.__initialize_weights(layer, hidden_layer_size[layer], hidden_layer_size[layer])
+            self.__initialize_weights(layer, hidden_layer_size[layer], hidden_layer_size[layer - 1])
             self.__initialize_bias(layer, hidden_layer_size[layer])
 
         # Inizializzazione dei pesi e dei bias per lo strato di output
