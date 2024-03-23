@@ -257,7 +257,7 @@ class NeuralNetwork:
 
     def forward_propagation(self, input_data):
         """
-        Esegue la propagazione in avanti attraverso la rete neurale.
+        Esegue la propagazione in avanti attraverso i pesi e i bias della rete neurale.
 
         Args:
             input_data (ndarray): Dati di input.
