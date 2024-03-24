@@ -23,7 +23,7 @@ def format_percentage(value):
 
 def copy_params_in_network(dst_net, src_net):
     """
-    Copia i parametri (pesi, bias, funzioni di attivazione) da una rete sorgente a una destinazione.
+    Copia i parametri (pesi, funzioni di attivazione) da una rete sorgente a una destinazione.
 
     Args:
         dst_net (NeuralNetwork): La rete di destinazione.
@@ -32,7 +32,6 @@ def copy_params_in_network(dst_net, src_net):
     # Copia dei pesi e dei bias
     for layer in range(len(src_net.layers_weights)):
         dst_net.layers_weights[layer] = src_net.layers_weights[layer].copy()
-        dst_net.layers_biases[layer] = src_net.layers_biases[layer].copy()
 
     # Copia delle funzioni di attivazione
     dst_net.hidden_activation_functions = src_net.hidden_activation_functions

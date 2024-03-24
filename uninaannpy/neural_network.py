@@ -31,7 +31,6 @@ class NeuralNetwork:
             output_layer_size (int): Dimensione dello strato di output.
         """
 
-        self.layers_biases = []
         self.layers_weights = []
         self.hidden_layers = hidden_layers
 
@@ -55,19 +54,16 @@ class NeuralNetwork:
 
         hidden_layer_size = self.hidden_layers
 
-        # Inizializzazione dei pesi e dei bias per lo strato di input
+        # Inizializzazione dei pesi e del bias per lo strato di input
         self.__initialize_weights(0, hidden_layer_size[0], input_layer_size)
-        self.__initialize_bias(0, hidden_layer_size[0])
 
         # Inizializzazione dei pesi e dei bias per gli strati nascosti
         for layer in range(1, self.number_of_hidden_layers):
             self.__initialize_weights(layer, hidden_layer_size[layer], hidden_layer_size[layer - 1])
-            self.__initialize_bias(layer, hidden_layer_size[layer])
 
-        # Inizializzazione dei pesi e dei bias per lo strato di output
+        # Inizializzazione dei pesi e del bias per lo strato di output
         self.__initialize_weights(self.number_of_hidden_layers, output_layer_size,
                                   hidden_layer_size[self.number_of_hidden_layers - 1])
-        self.__initialize_bias(self.number_of_hidden_layers, output_layer_size)
 
     def __initialize_weights(self, index, number_of_layer_neurons, input_variables):
         """
@@ -80,52 +76,7 @@ class NeuralNetwork:
         """
 
         self.layers_weights.insert(index, np.random.normal(self.MU, self.SIGMA, size=(number_of_layer_neurons,
-                                                                                      input_variables)))
-
-    def __initialize_bias(self, index, number_of_layer_neurons):
-        """
-        Inizializza i bias per uno specifico strato della rete neurale.
-
-        Args:
-            index (int): Indice dello strato.
-            number_of_layer_neurons (int): Numero di neuroni nello strato.
-        """
-
-        self.layers_biases.insert(index, np.random.normal(self.MU, self.SIGMA, size=(number_of_layer_neurons, 1)))
-
-    def get_weights(self, layer=0):
-        """
-        Restituisce i pesi per uno specifico strato della rete neurale.
-
-        Args:
-            layer (int, optional): Indice dello strato.
-
-        Returns:
-            numpy.ndarray: Pesi per lo strato specificato.
-        """
-
-        weights = self.layers_weights
-        if layer > 0:
-            return weights[layer - 1]
-        else:
-            return weights
-
-    def get_biases(self, layer=0):
-        """
-        Restituisce i bias per uno specifico strato della rete neurale.
-
-        Args:
-            layer (int, optional): Indice dello strato.
-
-        Returns:
-            numpy.ndarray: Bias per lo strato specificato.
-        """
-
-        biases = self.layers_biases
-        if layer > 0:
-            return biases[layer - 1]
-        else:
-            return biases
+                                                                                      input_variables + 1)))
 
     # Funzione per ottenere le funzioni di attivazione
     def get_activation_functions(self, layer=0):
@@ -201,7 +152,7 @@ class NeuralNetwork:
 
         # Stampa delle caratteristiche della rete
         print('Numero di strati nascosti:', num_hidden_layers)
-        print('Dimensione dell\'input:', input_size)
+        print('Dimensione dell\'input:', input_size - 1)
         print('Dimensione dell\'output:', output_size)
         print('Neuroni negli strati nascosti:', ', '.join(map(str, num_neurons_hidden_layers)))
         print('Funzioni di attivazione:', ', '.join(activation_functions))
@@ -231,7 +182,6 @@ class NeuralNetwork:
         """
         # Estrazione dei parametri della rete
         weights = self.layers_weights
-        biases = self.layers_biases
         activation_functions = self.hidden_activation_functions
 
         num_layers = len(self.layers_weights)
@@ -243,7 +193,7 @@ class NeuralNetwork:
 
         for layer in range(num_layers):
             # Trasformazione lineare tra i pesi e l'input del neurone corrente
-            result = np.dot(weights[layer], layer_outputs[layer]) + biases[layer]
+            result = np.dot(weights[layer][:, 1:], layer_outputs[layer]) + weights[layer][:, 0:1]
             layer_output = activation_functions[layer](result)  # Output del layer dopo l'attivazione
 
             # Calcolo della derivata della funzione di attivazione
@@ -267,27 +217,31 @@ class NeuralNetwork:
         """
         # Estrae i parametri della rete
         weights = self.layers_weights
-        biases = self.layers_biases
         activation_functions = self.hidden_activation_functions
         num_layers = len(self.layers_weights)
+
+        # Creiamo un vettore di 1 di dimensioni num_cols di input_data
+        ones_row = np.ones(input_data.shape[1])
 
         # Inizializza z con i dati di input
         z = input_data
         for layer in range(num_layers):
+            # Aggiungiamo la riga di 1 per l'input x_0 il cui peso sarà il bias
+            z = np.insert(z, 0, ones_row, axis=0)
+
             # Calcola l'output del layer corrente
-            a = np.matmul(weights[layer], z) + biases[layer]
+            a = np.matmul(weights[layer], z)
             z = activation_functions[layer](a)
 
         return z
 
-    def gradient_descent(self, learning_rate, weights_der, biases_der):
+    def gradient_descent(self, learning_rate, weights_der):
         """
         Aggiorna i pesi e i bias della rete neurale utilizzando la discesa del gradiente.
 
         Args:
             learning_rate (float): Tasso di apprendimento per controllare la dimensione dei passi dell'aggiornamento.
             weights_der (list): Lista dei gradienti dei pesi per ciascuno strato.
-            biases_der (list): Lista dei gradienti dei bias per ciascuno strato.
 
         Returns:
             NeuralNetwork: Rete neurale aggiornata.
@@ -295,9 +249,6 @@ class NeuralNetwork:
         for layer in range(len(self.layers_weights)):
             # Aggiornamento dei pesi utilizzando il gradiente discendente
             self.layers_weights[layer] -= learning_rate * weights_der[layer]
-
-            # Aggiornamento dei bias utilizzando il gradiente discendente
-            self.layers_biases[layer] -= learning_rate * biases_der[layer]
 
         return self
 
@@ -320,7 +271,6 @@ class NeuralNetwork:
 
         # Inizializzazione dei gradienti dei pesi e dei bias
         weight_gradients = []
-        bias_gradients = []
 
         # Calcolo dei gradienti dei pesi e dei bias per ciascuno strato, partendo dallo strato di output
         for layer in range(num_layers - 1, -1, -1):
@@ -331,18 +281,19 @@ class NeuralNetwork:
                 delta = [input_activations[-1] * output_error_derivative]
             else:
                 # Calcolo del delta per gli strati intermedi
-                error_derivative = input_activations[layer] * np.matmul(weights[layer + 1].T, delta[0])
+                error_derivative = input_activations[layer] * np.matmul(weights[layer + 1][:, 1:].T, delta[0])
                 delta = [error_derivative]
 
             # Calcolo del gradiente dei pesi per lo strato corrente
             weight_gradient = np.matmul(delta[0], layer_outputs[layer].T)
-            weight_gradients.insert(0, weight_gradient)
 
             # Calcolo del gradiente del bias per lo strato corrente
             bias_gradient = np.sum(delta[0], axis=1, keepdims=True)
-            bias_gradients.insert(0, bias_gradient)
+            weight_gradient = np.hstack((bias_gradient, weight_gradient))
 
-        return weight_gradients, bias_gradients
+            weight_gradients.insert(0, weight_gradient)
+
+        return weight_gradients
 
     def network_accuracy(self, input_data, labels):
         """
@@ -365,9 +316,9 @@ class NeuralNetwork:
         net_accuracy_training = self.network_accuracy(train_in, train_labels)
         print(f'Train accuracy: {net_accuracy_training}%')
 
-    def rprops(self, weights_der, biases_der, weights_delta, biases_delta, weights_der_prev, biases_der_prev,
-               layer_weights_difference_prev, layer_biases_difference_prev, train_error, train_error_prev, eta_pos=1.2,
-               eta_neg=0.5, delta_max=50, delta_min=0.00001, rprop_type=RPropType.STANDARD):
+    def rprops(self, weights_der, weights_delta, weights_der_prev, layer_weights_difference_prev, train_error,
+               train_error_prev, eta_pos=1.2, eta_neg=0.5, delta_max=50, delta_min=0.00001,
+               rprop_type=RPropType.STANDARD):
         """
         Funzione RProp per l'aggiornamento dei pesi per reti multistrato. Implementa la versione standard e le tre varianti
         contenute nell'articolo "Empirical evaluation of the improved Rprop learning algorithms". Le varianti vengono
@@ -375,13 +326,9 @@ class NeuralNetwork:
 
         Args:
             weights_der (list): Lista dei gradienti dei pesi per ciascuno strato.
-            biases_der (list): Lista dei gradienti dei bias per ciascuno strato.
             weights_delta (list): Lista dei delta dei pesi per ciascuno strato.
-            biases_delta (list): Lista dei delta dei bias per ciascuno strato.
             weights_der_prev (list): Lista dei gradienti dei pesi della precedente iterazione.
-            biases_der_prev (list): Lista dei gradienti dei bias della precedente iterazione.
             layer_weights_difference_prev (list): Lista delle differenze dei pesi della precedente iterazione.
-            layer_biases_difference_prev (list): Lista delle differenze dei bias della precedente iterazione.
             train_error (float): Errore dell'epoca corrente.
             train_error_prev (float): Errore dell'epoca precedente.
             eta_pos (float): Fattore di aggiornamento dei delta per derivata positiva (default: 1.2).
@@ -396,11 +343,9 @@ class NeuralNetwork:
 
         # Inizializzazione delle liste dei delta per i pesi e i bias per l'attuale strato
         layer_weights_difference = layer_weights_difference_prev
-        layer_biases_difference = layer_biases_difference_prev
 
         for layer in range(len(self.layers_weights)):
             layer_weights = self.layers_weights[layer]
-            layer_biases = self.layers_biases[layer]
 
             for num_rows in range(len(weights_der[layer])):
                 for num_cols in range(len(weights_der[layer][num_rows])):
@@ -413,8 +358,9 @@ class NeuralNetwork:
                                                                        eta_pos, delta_max)
 
                         # Aggiornamento della differenza del peso
-                        layer_weights_difference[layer][num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][num_cols])
-                                                                         * weights_delta[layer][num_rows][num_cols])
+                        layer_weights_difference[layer][num_rows][num_cols] = -(
+                                np.sign(weights_der[layer][num_rows][num_cols])
+                                * weights_delta[layer][num_rows][num_cols])
 
                     elif weight_der_product < 0:
                         # Calcolo della nuova dimensione del delta per i pesi
@@ -423,17 +369,18 @@ class NeuralNetwork:
 
                         if rprop_type == RPropType.STANDARD or rprop_type == RPropType.IRPROP:
                             # Aggiornamento della differenza del peso
-                            layer_weights_difference[layer][num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][
-                                                                                         num_cols]) *
-                                                                             weights_delta[layer][num_rows][num_cols])
+                            layer_weights_difference[layer][num_rows][num_cols] = -(
+                                    np.sign(weights_der[layer][num_rows][
+                                                num_cols]) *
+                                    weights_delta[layer][num_rows][num_cols])
                         else:
                             if rprop_type == RPropType.IRPROP_PLUS and train_error <= train_error_prev:
                                 # Aggiornamento della differenza del peso
                                 layer_weights_difference[layer][num_rows][num_cols] = 0
                             else:
                                 # Aggiornamento della differenza del peso
-                                layer_weights_difference[layer][num_rows][num_cols] = -layer_weights_difference_prev[layer][num_rows][
-                                    num_cols]
+                                layer_weights_difference[layer][num_rows][num_cols] = - layer_weights_difference_prev[
+                                    layer][num_rows][num_cols]
 
                         if rprop_type != RPropType.STANDARD:
                             # Aggiornamento della derivata del peso
@@ -441,62 +388,19 @@ class NeuralNetwork:
 
                     else:
                         # Aggiornamento della differenza del peso
-                        layer_weights_difference[layer][num_rows][num_cols] = -(np.sign(weights_der[layer][num_rows][num_cols])
-                                                                         * weights_delta[layer][num_rows][num_cols])
+                        layer_weights_difference[layer][num_rows][num_cols] = -(
+                                np.sign(weights_der[layer][num_rows][num_cols])
+                                * weights_delta[layer][num_rows][num_cols])
 
-                    # Aggiornamento dei pesi
+                    # Aggiornamento del peso
                     layer_weights[num_rows][num_cols] += layer_weights_difference[layer][num_rows][num_cols]
 
-                    # Aggiornamento dei gradienti dei bias precedenti
+                    # Aggiornamento del gradiente del peso precedente
                     weights_der_prev[layer][num_rows][num_cols] = weights_der[layer][num_rows][num_cols]
 
                     layer_weights_difference_prev[layer][num_rows][num_cols] = layer_weights_difference[layer][num_rows][num_cols]
 
-                biases_der_product = biases_der_prev[layer][num_rows][0] * biases_der[layer][num_rows][0]
-
-                if biases_der_product > 0:
-                    # Calcolo della nuova dimensione del delta per i bias
-                    biases_delta[layer][num_rows][0] = min(biases_delta[layer][num_rows][0] * eta_pos, delta_max)
-
-                    # Aggiornamento della differenza del bias
-                    layer_biases_difference[layer][num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
-                                                             biases_delta[layer][num_rows][0])
-
-                elif biases_der_product < 0:
-                    # Calcolo della nuova dimensione del delta per i bias
-                    biases_delta[layer][num_rows][0] = max(biases_delta[layer][num_rows][0] * eta_neg, delta_min)
-
-                    if rprop_type == RPropType.STANDARD or rprop_type == RPropType.IRPROP:
-                        # Aggiornamento del delta del bias
-                        layer_biases_difference[layer][num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
-                                                                 biases_delta[layer][num_rows][0])
-                    else:
-                        if rprop_type == RPropType.IRPROP_PLUS and train_error <= train_error_prev:
-                            # Aggiornamento della differenza del bias
-                            layer_biases_difference[layer][num_rows][0] = 0
-
-                        else:
-                            # Aggiornamento della differenza del bias
-                            layer_biases_difference[layer][num_rows][0] = -layer_biases_difference_prev[layer][num_rows][0]
-
-                    if rprop_type != RPropType.STANDARD:
-                        # Aggiornamento della derivata del bias
-                        biases_der[layer][num_rows][0] = 0
-
-                else:
-                    # Aggiornamento della differenza del bias
-                    layer_biases_difference[layer][num_rows][0] = -(np.sign(biases_der[layer][num_rows][0]) *
-                                                             biases_delta[layer][num_rows][0])
-
-                # Aggiornamento dei bias
-                layer_biases[num_rows][0] += layer_biases_difference[layer][num_rows][0]
-
-                # Aggiornamento dei gradienti dei bias precedenti
-                biases_der_prev[layer][num_rows][0] = biases_der[layer][num_rows][0]
-
-                layer_biases_difference_prev[layer][num_rows][0] = layer_biases_difference[layer][num_rows][0]
-
-        return layer_weights_difference, layer_biases_difference
+        return layer_weights_difference
 
     def train_neural_network(self, train_in, train_labels, validation_in, validation_labels, epochs=100,
                              learning_rate=0.1, rprop_type=RPropType.STANDARD):
@@ -526,8 +430,7 @@ class NeuralNetwork:
         error_function = self.error_function
 
         # Inizializzazione delta e derivate precedenti
-        (weights_delta, biases_delta, weights_der_prev, biases_der_prev, layer_weights_difference,
-         layer_biases_difference) = None, None, None, None, None, None
+        weights_delta, weights_der_prev, layer_weights_difference = None, None, None
 
         # Inizializzazione training
         train_net_out = self.forward_propagation(train_in)
@@ -557,28 +460,22 @@ class NeuralNetwork:
         for epoch in range(epochs):
             # Gradient descent e Back-propagation
             layer_out, layer_act_fun_der = self.compute_gradients(train_in)
-            weights_der, biases_der = self.back_propagation(layer_act_fun_der, layer_out, train_labels, error_function)
+            weights_der = self.back_propagation(layer_act_fun_der, layer_out, train_labels, error_function)
 
             if epoch == 0:
                 # Aggiornamento pesi tramite discesa del gradiente
-                self.gradient_descent(learning_rate, weights_der, biases_der)
+                self.gradient_descent(learning_rate, weights_der)
 
                 # Inizializzazione dei pesi e dei bias per la funzione RProp
                 weights_delta = [[[0.1 for _ in row] for row in sub_list] for sub_list in weights_der]
                 layer_weights_difference = [[[0. for _ in row] for row in sub_list] for sub_list in weights_der]
 
-                biases_delta = [[[0.1 for _ in row] for row in sub_list] for sub_list in biases_der]
-                layer_biases_difference = [[[0. for _ in row] for row in sub_list] for sub_list in biases_der]
-
                 weights_der_prev = deepcopy(weights_der)
-                biases_der_prev = deepcopy(biases_der)
             else:
                 # Aggiornamento della rete utilizzando la funzione RProp
-                (layer_weights_difference,
-                 layer_biases_difference) = self.rprops(weights_der, biases_der, weights_delta, biases_delta,
-                                                        weights_der_prev, biases_der_prev, layer_weights_difference,
-                                                        layer_biases_difference, train_error, train_error_prev,
-                                                        rprop_type=rprop_type)
+                layer_weights_difference = self.rprops(weights_der, weights_delta, weights_der_prev,
+                                                       layer_weights_difference, train_error, train_error_prev,
+                                                       rprop_type=rprop_type)
 
             train_error_prev = train_error
 
@@ -601,7 +498,7 @@ class NeuralNetwork:
             validation_accuracy = ut.compute_accuracy(validation_net_out, validation_labels)
             train_accuracies.append(train_accuracy)
             validation_accuracies.append(validation_accuracy)
-            print(f'\nEpoca: {epoch + 1}/{epochs}   rProp utilizzata: {rprop_type}\n'
+            print(f'\nEpoca: {epoch + 1}/{epochs}   RProp utilizzata: {rprop_type}\n'
                   f'    Training Accuracy: {ut.format_percentage(train_accuracy)}%,\n'
                   f'    Validation Accuracy: {ut.format_percentage(validation_accuracy)}%\n')
 
