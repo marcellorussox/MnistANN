@@ -78,53 +78,6 @@ class NeuralNetwork:
         self.layers_weights.insert(index, np.random.normal(self.MU, self.SIGMA, size=(number_of_layer_neurons,
                                                                                       input_variables + 1)))
 
-    # Funzione per ottenere le funzioni di attivazione
-    def get_activation_functions(self, layer=0):
-        """
-        Restituisce le funzioni di attivazione per uno specifico strato della rete.
-
-        Args:
-            layer (int, optional): Indice dello strato.
-
-        Returns:
-            list: Funzioni di attivazione del layer specificato.
-        """
-        if layer > 0:
-            return self.hidden_activation_functions[layer - 1]
-        else:
-            return self.hidden_activation_functions
-
-    # Metodo per modificare le funzioni di attivazione
-    def set_activation_function(self, layer_indices, activation_function=af.tanh, layer_type=1):
-        """
-        Imposta le funzioni di attivazione per la rete neurale.
-
-        Args:
-            network (NeuralNetwork): Rete neurale.
-            layer_indices (list): Indici degli strati da modificare.
-            activation_function (function, optional): Funzione di attivazione da impostare.
-            layer_type (int, optional): Tipo di modifica da applicare.
-        Returns:
-            NeuralNetwork: Rete neurale modificata.
-        """
-        if layer_type == 0:  # Modifica la funzione di attivazione per gli strati specificati
-            if np.isscalar(layer_indices):
-                self.hidden_activation_functions[layer_indices - 1] = activation_function
-            else:
-                for layer, index in enumerate(layer_indices):
-                    self.hidden_activation_functions[index - 1] = activation_function[layer]
-        elif layer_type == 1:  # Modifica la funzione di attivazione per tutti gli strati interni
-            for layer in range(self.number_of_hidden_layers):
-                self.hidden_activation_functions[layer] = activation_function
-        else:  # Modifica la funzione di attivazione per lo strato di output
-            self.hidden_activation_functions[self.number_of_hidden_layers] = activation_function
-
-        # Controllo per verificare se il numero di funzioni di attivazione è uguale al numero di strati interni
-        if len(self.hidden_activation_functions) != self.number_of_hidden_layers + 1:
-            raise ValueError("Il numero di funzioni di attivazione deve essere uguale al numero di layer!")
-
-        return self
-
     def get_net_structure(self):
         """
         Ottiene e stampa le caratteristiche della rete neurale.
