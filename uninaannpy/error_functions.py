@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def sum_of_squares(net_output, labels, der=False, lambda_reg=0.1):
+def sum_of_squares(net_output, labels, der=False):
     """
     Calcola la funzione di somma dei quadrati o la sua derivata.
 
@@ -19,7 +19,7 @@ def sum_of_squares(net_output, labels, der=False, lambda_reg=0.1):
     if not der:
         return 0.5 * np.sum(np.power(z, 2))
     else:
-        return z + lambda_reg * net_output
+        return z
 
 
 def softmax(net_output):
@@ -45,7 +45,7 @@ def softmax(net_output):
     return z
 
 
-def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15, reg_lambda=0.01):
+def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15):
     """
     Calcola la cross-entropy tra i valori previsti net_output e i valori target labels utilizzando la funzione softmax.
 
@@ -67,10 +67,10 @@ def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15, reg_lamb
     if not der:
         return -np.sum(labels * np.log(softmax_output))
     else:
-        return (softmax_output - labels) + reg_lambda * net_output
+        return softmax_output - labels
 
 
-def cross_entropy(net_output, labels, der=False, epsilon=1e-15, lambda_reg=0.1):
+def cross_entropy(net_output, labels, der=False, epsilon=1e-15):
     """
     Calcola la cross-entropy tra l'output della rete e le etichette fornite.
 
@@ -90,4 +90,4 @@ def cross_entropy(net_output, labels, der=False, epsilon=1e-15, lambda_reg=0.1):
     if not der:
         return -np.sum(labels * np.log(net_output))
     else:
-        return net_output - labels + lambda_reg * net_output
+        return net_output - labels
