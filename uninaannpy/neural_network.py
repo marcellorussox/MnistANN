@@ -1,7 +1,5 @@
 from copy import deepcopy
 from enum import Enum
-
-from uninaannpy import activation_functions as af
 from uninaannpy import utility as ut
 
 import numpy as np
