@@ -5,7 +5,7 @@ from uninaannpy import utility as ut
 import numpy as np
 
 
-class RPropType(Enum):
+class RpropType(Enum):
     STANDARD = 1
     RPROP_PLUS = 2
     IRPROP = 3
@@ -269,9 +269,9 @@ class NeuralNetwork:
 
     def rprops(self, weights_der, weights_delta, weights_der_prev, layer_weights_difference_prev, train_error,
                train_error_prev, eta_pos=1.2, eta_neg=0.5, delta_max=50, delta_min=0.00001,
-               rprop_type=RPropType.STANDARD):
+               rprop_type=RpropType.STANDARD):
         """
-        Funzione RProp per l'aggiornamento dei pesi per reti multistrato. Implementa la versione standard e le tre varianti
+        Funzione Rprop per l'aggiornamento dei pesi per reti multistrato. Implementa la versione standard e le tre varianti
         contenute nell'articolo "Empirical evaluation of the improved Rprop learning algorithms". Le varianti vengono
         implementate tramite l'attributo rprop_type.
 
@@ -286,10 +286,10 @@ class NeuralNetwork:
             eta_neg (float): Fattore di aggiornamento dei delta per derivata negativa (default: 0.5).
             delta_max (float): Limite superiore per il delta (default: 50).
             delta_min (float): Limite inferiore per il delta (default: 0.00001).
-            rprop_type (RPropType): Tipo di RProp da utilizzare (default: RpropType.STANDARD).
+            rprop_type (RpropType): Tipo di Rprop da utilizzare (default: RpropType.STANDARD).
 
         Returns:
-            NeuralNetwork: Rete neurale aggiornata con il metodo RProp.
+            NeuralNetwork: Rete neurale aggiornata con il metodo Rprop.
         """
 
         # Inizializzazione delle liste dei delta per i pesi e i bias per l'attuale strato
@@ -318,22 +318,22 @@ class NeuralNetwork:
                         weights_delta[layer][num_rows][num_cols] = max(weights_delta[layer][num_rows][num_cols] *
                                                                        eta_neg, delta_min)
 
-                        if rprop_type == RPropType.STANDARD or rprop_type == RPropType.IRPROP:
+                        if rprop_type == RpropType.STANDARD or rprop_type == RpropType.IRPROP:
                             # Aggiornamento della differenza del peso
                             layer_weights_difference[layer][num_rows][num_cols] = -(
                                     np.sign(weights_der[layer][num_rows][
                                                 num_cols]) *
                                     weights_delta[layer][num_rows][num_cols])
                         else:
-                            if rprop_type == RPropType.IRPROP_PLUS and train_error <= train_error_prev:
+                            if rprop_type == RpropType.RPROP_PLUS or train_error > train_error_prev:
                                 # Aggiornamento della differenza del peso
-                                layer_weights_difference[layer][num_rows][num_cols] = 0
+                                layer_weights_difference[layer][num_rows][num_cols] = -layer_weights_difference_prev[
+                                    layer][num_rows][num_cols]
                             else:
                                 # Aggiornamento della differenza del peso
-                                layer_weights_difference[layer][num_rows][num_cols] = - layer_weights_difference_prev[
-                                    layer][num_rows][num_cols]
+                                layer_weights_difference[layer][num_rows][num_cols] = 0
 
-                        if rprop_type != RPropType.STANDARD:
+                        if rprop_type != RpropType.STANDARD:
                             # Aggiornamento della derivata del peso
                             weights_der[layer][num_rows][num_cols] = 0
 
@@ -354,7 +354,7 @@ class NeuralNetwork:
         return layer_weights_difference
 
     def train_neural_network(self, train_in, train_labels, validation_in, validation_labels, epochs=100,
-                             learning_rate=0.1, rprop_type=RPropType.STANDARD):
+                             learning_rate=0.00001, rprop_type=RpropType.STANDARD):
         """
         Processo di apprendimento per la rete neurale.
 
@@ -365,7 +365,7 @@ class NeuralNetwork:
             validation_labels (numpy.ndarray): Target desiderati per i dati di input di validazione.
             epochs (int, optional): Numero massimo di epoche per il training (default: 100).
             learning_rate (float, optional): Tasso di apprendimento per il gradiente discendente (default: 0.1).
-            rprop_type (RPropType): Tipo di RProp da utilizzare (default: RpropType.STANDARD).
+            rprop_type (RpropType): Tipo di Rprop da utilizzare (default: RpropType.STANDARD).
 
         Returns:
             tuple: Una tupla contenente:
@@ -403,9 +403,9 @@ class NeuralNetwork:
         train_accuracies.append(train_accuracy)
         validation_accuracies.append(validation_accuracy)
 
-        print(f'\nEpoca: 0/{epochs}    rProp utilizzata: {rprop_type}\n'
-              f'    Training Accuracy: {ut.format_percentage(train_accuracy)}%,\n'
-              f'    Validation Accuracy: {ut.format_percentage(validation_accuracy)}%\n')
+        print(f'\nEpoca: 0/{epochs}    Rprop utilizzata: {rprop_type}\n'
+              f'    Training Accuracy: {format_percentage(train_accuracy)}%,\n'
+              f'    Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
 
         # Inizio fase di apprendimento
         for epoch in range(epochs):
@@ -413,17 +413,17 @@ class NeuralNetwork:
             layer_out, layer_act_fun_der = self.compute_gradients(train_in)
             weights_der = self.back_propagation(layer_act_fun_der, layer_out, train_labels, error_function)
 
-            if epoch == 0:
+            if epoch == 0:  # Prima epoca
                 # Aggiornamento pesi tramite discesa del gradiente
                 self.gradient_descent(learning_rate, weights_der)
 
-                # Inizializzazione dei pesi e dei bias per la funzione RProp
+                # Inizializzazione dei pesi e dei bias per la funzione Rprop
                 weights_delta = [[[0.1 for _ in row] for row in sub_list] for sub_list in weights_der]
                 layer_weights_difference = [[[0. for _ in row] for row in sub_list] for sub_list in weights_der]
 
                 weights_der_prev = deepcopy(weights_der)
             else:
-                # Aggiornamento della rete utilizzando la funzione RProp
+                # Aggiornamento della rete utilizzando la funzione Rprop
                 layer_weights_difference = self.rprops(weights_der, weights_delta, weights_der_prev,
                                                        layer_weights_difference, train_error, train_error_prev,
                                                        rprop_type=rprop_type)
@@ -449,9 +449,9 @@ class NeuralNetwork:
             validation_accuracy = ut.compute_accuracy(validation_net_out, validation_labels)
             train_accuracies.append(train_accuracy)
             validation_accuracies.append(validation_accuracy)
-            print(f'\nEpoca: {epoch + 1}/{epochs}   RProp utilizzata: {rprop_type}\n'
-                  f'    Training Accuracy: {ut.format_percentage(train_accuracy)}%,\n'
-                  f'    Validation Accuracy: {ut.format_percentage(validation_accuracy)}%\n')
+            print(f'\nEpoca: {epoch + 1}/{epochs}   Rprop utilizzata: {rprop_type}\n'
+                  f'    Training Accuracy: {format_percentage(train_accuracy)}%,\n'
+                  f'    Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
 
         ut.copy_params_in_network(self, best_net)
 
