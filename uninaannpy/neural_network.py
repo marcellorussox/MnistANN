@@ -391,14 +391,14 @@ class NeuralNetwork:
         train_error = error_function(train_net_out, train_labels)
         train_errors.append(train_error)
 
-        train_error_prev = 999999
+        validation_error_prev = 999999
 
         # Inizializzazione best_net
         validation_net_out = self.forward_propagation(validation_in)
-        val_error = error_function(validation_net_out, validation_labels)
-        validation_errors.append(val_error)
+        validation_error = error_function(validation_net_out, validation_labels)
+        validation_errors.append(validation_error)
 
-        min_val_error = val_error
+        min_validation_error = validation_error
         best_net = self.duplicate_network()
 
         train_accuracy = compute_accuracy(train_net_out, train_labels)
@@ -428,10 +428,10 @@ class NeuralNetwork:
             else:
                 # Aggiornamento della rete utilizzando la funzione Rprop
                 layer_weights_difference = self.rprops(weights_der, weights_delta, weights_der_prev,
-                                                       layer_weights_difference, train_error, train_error_prev,
+                                                       layer_weights_difference, validation_error, validation_error_prev,
                                                        rprop_type=rprop_type)
 
-            train_error_prev = train_error
+            validation_error_prev = validation_error
 
             # Forward propagation per training set
             train_net_out = self.forward_propagation(train_in)
@@ -440,12 +440,12 @@ class NeuralNetwork:
 
             # Fase di validation
             validation_net_out = self.forward_propagation(validation_in)
-            val_error = error_function(validation_net_out, validation_labels)
-            validation_errors.append(val_error)
+            validation_error = error_function(validation_net_out, validation_labels)
+            validation_errors.append(validation_error)
 
             # Trova l'errore minimo e la rete migliore
-            if val_error < min_val_error:
-                min_val_error = val_error
+            if validation_error < min_validation_error:
+                min_validation_error = validation_error
                 best_net = self.duplicate_network()
 
             train_accuracy = compute_accuracy(train_net_out, train_labels)
