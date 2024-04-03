@@ -386,33 +386,35 @@ class NeuralNetwork:
         # Inizializzazione delta e derivate precedenti
         weights_delta, weights_der_prev, layer_weights_difference = None, None, None
 
-        # Inizializzazione training
-        train_net_out = self.forward_propagation(train_in)
-        train_error = error_function(train_net_out, train_labels)
-        train_errors.append(train_error)
-
         validation_error_prev = 999999
-
-        # Inizializzazione best_net
-        validation_net_out = self.forward_propagation(validation_in)
-        validation_error = error_function(validation_net_out, validation_labels)
-        validation_errors.append(validation_error)
-
-        min_validation_error = validation_error
+        min_validation_error = 999999
         best_net = self.duplicate_network()
 
-        train_accuracy = compute_accuracy(train_net_out, train_labels)
-        validation_accuracy = compute_accuracy(validation_net_out, validation_labels)
-        train_accuracies.append(train_accuracy)
-        validation_accuracies.append(validation_accuracy)
-
-        print(f'\nEpoca: 0/{epochs}    Rprop utilizzata: {rprop_type}\n'
-              f'    Training Accuracy: {format_percentage(train_accuracy)}%,\n'
-              f'    Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
-
         # Inizio fase di apprendimento
-        for epoch in range(epochs):
-            # Gradient descent e Back-propagation
+        for epoch in range(epochs + 1):
+
+            # Forward propagation per training set
+            train_net_out = self.forward_propagation(train_in)
+            train_error = error_function(train_net_out, train_labels)
+            train_errors.append(train_error)
+
+            # Forward propagation per validation set
+            validation_net_out = self.forward_propagation(validation_in)
+            validation_error = error_function(validation_net_out, validation_labels)
+            validation_errors.append(validation_error)
+
+            train_accuracy = compute_accuracy(train_net_out, train_labels)
+            validation_accuracy = compute_accuracy(validation_net_out, validation_labels)
+            train_accuracies.append(train_accuracy)
+            validation_accuracies.append(validation_accuracy)
+            print(f'\nEpoca: {epoch}/{epochs}   Rprop utilizzata: {rprop_type}\n'
+                  f'    Training Accuracy: {format_percentage(train_accuracy)}%,\n'
+                  f'    Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
+
+            if epoch == epochs:
+                break
+
+            # Calcolo gradienti dei pesi e Back-propagation
             layer_out, layer_act_fun_der = self.compute_gradients(train_in)
             weights_der = self.back_propagation(layer_act_fun_der, layer_out, train_labels, error_function)
 
@@ -433,28 +435,10 @@ class NeuralNetwork:
 
             validation_error_prev = validation_error
 
-            # Forward propagation per training set
-            train_net_out = self.forward_propagation(train_in)
-            train_error = error_function(train_net_out, train_labels)
-            train_errors.append(train_error)
-
-            # Fase di validation
-            validation_net_out = self.forward_propagation(validation_in)
-            validation_error = error_function(validation_net_out, validation_labels)
-            validation_errors.append(validation_error)
-
             # Trova l'errore minimo e la rete migliore
             if validation_error < min_validation_error:
                 min_validation_error = validation_error
                 best_net = self.duplicate_network()
-
-            train_accuracy = compute_accuracy(train_net_out, train_labels)
-            validation_accuracy = compute_accuracy(validation_net_out, validation_labels)
-            train_accuracies.append(train_accuracy)
-            validation_accuracies.append(validation_accuracy)
-            print(f'\nEpoca: {epoch + 1}/{epochs}   Rprop utilizzata: {rprop_type}\n'
-                  f'    Training Accuracy: {format_percentage(train_accuracy)}%,\n'
-                  f'    Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
 
         best_net.copy_params_in_network(self)
 
