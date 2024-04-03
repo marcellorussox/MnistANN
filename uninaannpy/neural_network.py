@@ -1,6 +1,9 @@
 from copy import deepcopy
 from enum import Enum
-from uninaannpy import utility as ut
+
+from matplotlib import pyplot as plt
+
+from uninaannpy import error_functions as ef
 
 import numpy as np
 
@@ -258,7 +261,7 @@ class NeuralNetwork:
             float: Percentuale di predizioni corrette rispetto ai target desiderati.
         """
         output = self.forward_propagation(input_data)
-        return ut.format_percentage(ut.compute_accuracy(output, labels))
+        return format_percentage(compute_accuracy(output, labels))
 
     def print_accuracies(self, title, test_in, test_labels, train_in, train_labels):
         print(title)
@@ -398,8 +401,8 @@ class NeuralNetwork:
         min_val_error = val_error
         best_net = self.duplicate_network()
 
-        train_accuracy = ut.compute_accuracy(train_net_out, train_labels)
-        validation_accuracy = ut.compute_accuracy(validation_net_out, validation_labels)
+        train_accuracy = compute_accuracy(train_net_out, train_labels)
+        validation_accuracy = compute_accuracy(validation_net_out, validation_labels)
         train_accuracies.append(train_accuracy)
         validation_accuracies.append(validation_accuracy)
 
@@ -445,14 +448,95 @@ class NeuralNetwork:
                 min_val_error = val_error
                 best_net = self.duplicate_network()
 
-            train_accuracy = ut.compute_accuracy(train_net_out, train_labels)
-            validation_accuracy = ut.compute_accuracy(validation_net_out, validation_labels)
+            train_accuracy = compute_accuracy(train_net_out, train_labels)
+            validation_accuracy = compute_accuracy(validation_net_out, validation_labels)
             train_accuracies.append(train_accuracy)
             validation_accuracies.append(validation_accuracy)
             print(f'\nEpoca: {epoch + 1}/{epochs}   Rprop utilizzata: {rprop_type}\n'
                   f'    Training Accuracy: {format_percentage(train_accuracy)}%,\n'
                   f'    Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
 
-        ut.copy_params_in_network(self, best_net)
+        best_net.copy_params_in_network(self)
 
         return train_errors, validation_errors, train_accuracies, validation_accuracies
+
+    def copy_params_in_network(self, destination_net):
+        """
+        Copia i parametri (pesi, funzioni di attivazione) da una rete sorgente a una destinazione.
+
+        Args:
+            self (NeuralNetwork): La rete sorgente.
+            destination_net (NeuralNetwork): La rete di destinazione.
+        """
+        # Copia dei pesi e dei bias
+        for layer in range(len(self.layers_weights)):
+            destination_net.layers_weights[layer] = self.layers_weights[layer].copy()
+
+        # Copia delle funzioni di attivazione
+        destination_net.hidden_activation_functions = self.hidden_activation_functions
+
+    def test_prediction(self, x, data_in):
+        """
+        Ottiene un esempio di predizione della rete neurale e lo visualizza insieme all'immagine corrispondente.
+
+        Args:
+            self (NeuralNetwork): Rete neurale da testare.
+            x (int): Indice dell'esempio da testare.
+            data_in (numpy.ndarray): Insieme di dati di test.
+        """
+        ix = np.reshape(data_in[:, x], (28, 28))
+        plt.figure()
+        plt.imshow(ix, 'gray')
+        net_out = self.forward_propagation(data_in[:, x:x + 1])
+        # Utilizza la funzione softmax per ottenere valori probabilistici
+        net_out = ef.softmax(net_out)
+        print('Probabilità predette dalla rete:')
+        for i, probability in enumerate(net_out):
+            print(f'Classe {i}: {format_percentage(probability[0])}%')
+
+
+def compute_accuracy(output, labels):
+    """
+    Calcola l'accuratezza della rete neurale confrontando le previsioni con i target desiderati.
+
+    Args:
+        output (numpy.ndarray): Array contenente le previsioni della rete.
+        labels (numpy.ndarray): Array contenente i target desiderati.
+
+    Returns:
+        float: Rapporto tra predizioni corrette e target desiderati.
+    """
+    num_samples = labels.shape[1]
+
+    # Applica la funzione softmax alle previsioni della rete
+    softmax_predictions = ef.softmax(output)
+
+    # Trova l'indice dell'elemento di valore massimo lungo l'asse delle colonne
+    predicted_classes = np.argmax(softmax_predictions, axis=0)
+
+    # Trova l'indice dell'elemento di valore massimo lungo l'asse delle colonne negli obiettivi desiderati
+    target_classes = np.argmax(labels, axis=0)
+
+    # Confronta gli indici predetti con gli indici degli obiettivi desiderati e calcola l'accuratezza
+    correct_predictions = np.sum(predicted_classes == target_classes)
+    accuracy = correct_predictions / num_samples
+
+    return accuracy
+
+
+def format_percentage(value):
+    """
+    Formatta un valore o un array di valori come percentuale compresa tra 0 e 100 con solo le prime 5 cifre decimali.
+
+    Args:
+        value (float or numpy.ndarray): Valore o array di valori da formattare come percentuale.
+
+    Returns:
+        float or numpy.ndarray: Valore o array dei valori percentuali formattati.
+    """
+    # Se il valore è un array, applica il formattazione a ciascun elemento
+    if isinstance(value, np.ndarray):
+        return np.round(value * 100, decimals=5)
+    # Se il valore è un float, applica il formattazione direttamente
+    else:
+        return round(value * 100, 5)
