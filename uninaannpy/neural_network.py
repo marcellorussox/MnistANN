@@ -1,11 +1,10 @@
 from copy import deepcopy
 from enum import Enum
+import time
+import numpy as np
 
 from matplotlib import pyplot as plt
-
 from uninaannpy import error_functions as ef
-
-import numpy as np
 
 
 class RpropType(Enum):
@@ -390,6 +389,9 @@ class NeuralNetwork:
         min_validation_error = 999999
         best_net = self.duplicate_network()
 
+        # Avvia il timer
+        start_time = time.time()
+
         # Inizio fase di apprendimento
         for epoch in range(epochs + 1):
 
@@ -430,8 +432,8 @@ class NeuralNetwork:
             else:
                 # Aggiornamento della rete utilizzando la funzione Rprop
                 layer_weights_difference = self.rprops(weights_der, weights_delta, weights_der_prev,
-                                                       layer_weights_difference, validation_error, validation_error_prev,
-                                                       rprop_type=rprop_type)
+                                                       layer_weights_difference, validation_error,
+                                                       validation_error_prev, rprop_type=rprop_type)
 
             validation_error_prev = validation_error
 
@@ -439,6 +441,11 @@ class NeuralNetwork:
             if validation_error < min_validation_error:
                 min_validation_error = validation_error
                 best_net = self.duplicate_network()
+
+        # Ferma il timer
+        end_time = time.time()
+
+        print("L'addestramento ha impiegato", round(end_time - start_time, 5), "secondi per eseguire.")
 
         best_net.copy_params_in_network(self)
 
