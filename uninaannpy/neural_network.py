@@ -408,8 +408,8 @@ class NeuralNetwork:
             train_accuracies.append(train_accuracy)
             validation_accuracies.append(validation_accuracy)
             print(f'\nEpoca: {epoch}/{epochs}   Rprop utilizzata: {rprop_type}\n'
-                  f'    Training Accuracy: {format_percentage(train_accuracy)}%,\n'
-                  f'    Validation Accuracy: {format_percentage(validation_accuracy)}%\n')
+                  f'    Training Accuracy: {format_percentage(train_accuracy)}%,       Training Loss: {np.round(train_error, decimals=5)};\n'
+                  f'    Validation Accuracy: {format_percentage(validation_accuracy)}%,     Validation Loss: {np.round(validation_error, decimals=5)}\n')
 
             if epoch == epochs:
                 break
