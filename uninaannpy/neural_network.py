@@ -260,7 +260,7 @@ class NeuralNetwork:
             float: Percentuale di predizioni corrette rispetto ai target desiderati.
         """
         output = self.forward_propagation(input_data)
-        return format_percentage(compute_accuracy(output, labels))
+        return compute_accuracy(output, labels)
 
     def print_accuracies(self, title, test_in, test_labels, train_in, train_labels):
         """
@@ -280,9 +280,9 @@ class NeuralNetwork:
         """
         print(title)
         net_accuracy_test = self.network_accuracy(test_in, test_labels)
-        print(f'Test accuracy: {net_accuracy_test}')
+        print(f'Test accuracy: {np.round(net_accuracy_test, 5)}')
         net_accuracy_training = self.network_accuracy(train_in, train_labels)
-        print(f'Train accuracy: {net_accuracy_training}')
+        print(f'Train accuracy: {np.round(net_accuracy_training, 5)}')
         return net_accuracy_test
 
     def rprops(self, weights_der, weights_delta, weights_der_prev, layer_weights_difference_prev, train_error,
@@ -426,8 +426,8 @@ class NeuralNetwork:
             train_accuracies.append(train_accuracy)
             validation_accuracies.append(validation_accuracy)
             print(f'\nEpoca: {epoch}/{epochs}   Rprop utilizzata: {rprop_type}\n'
-                  f'    Training Accuracy: {format_percentage(train_accuracy)}%,       Training Loss: {np.round(train_error, decimals=5)};\n'
-                  f'    Validation Accuracy: {format_percentage(validation_accuracy)}%,     Validation Loss: {np.round(validation_error, decimals=5)}\n')
+                  f'    Training Accuracy: {np.round(train_accuracy, 5)},       Training Loss: {np.round(train_error, 5)};\n'
+                  f'    Validation Accuracy: {np.round(validation_accuracy, 5)},     Validation Loss: {np.round(validation_error, 5)}\n')
 
             if epoch == epochs:
                 break
@@ -495,11 +495,12 @@ class NeuralNetwork:
         plt.figure()
         plt.imshow(ix, 'gray')
         net_out = self.forward_propagation(data_in[:, x:x + 1])
+
         # Utilizza la funzione softmax per ottenere valori probabilistici
         net_out = ef.softmax(net_out)
         print('Probabilità predette dalla rete:')
         for i, probability in enumerate(net_out):
-            print(f'Classe {i}: {format_percentage(probability[0])}%')
+            print(f'Classe {i}: {probability[0]}')
 
 
 def compute_accuracy(output, labels):
@@ -529,21 +530,3 @@ def compute_accuracy(output, labels):
     accuracy = correct_predictions / num_samples
 
     return accuracy
-
-
-def format_percentage(value):
-    """
-    Formatta un valore o un array di valori come percentuale compresa tra 0 e 100 con solo le prime 5 cifre decimali.
-
-    Args:
-        value (float or numpy.ndarray): Valore o array di valori da formattare come percentuale.
-
-    Returns:
-        float or numpy.ndarray: Valore o array dei valori percentuali formattati.
-    """
-    # Se il valore è un array, applica il formattazione a ciascun elemento
-    if isinstance(value, np.ndarray):
-        return np.round(value * 100, decimals=5)
-    # Se il valore è un float, applica il formattazione direttamente
-    else:
-        return round(value * 100, 5)
