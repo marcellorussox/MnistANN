@@ -9,7 +9,6 @@ def sum_of_squares(net_output, labels, der=False):
         net_output (numpy.ndarray): Vettore delle previsioni del modello.
         labels (numpy.ndarray): Vettore dei valori target.
         der (bool, optional): Se è False, calcola la funzione di somma dei quadrati, altrimenti calcola la derivata. Default è False.
-        lambda_reg (float, optional): Parametro di regolarizzazione L2. Default è 0.1.
 
     Returns:
         float: Se compute_derivative=False, restituisce il valore della funzione di somma dei quadrati.
@@ -54,7 +53,6 @@ def cross_entropy_softmax(net_output, labels, der=False, epsilon=1e-15):
         labels (numpy.ndarray): Array contenente i valori target.
         der (bool, optional): Indica se calcolare la derivata della cross-entropy. Default è False.
         epsilon (float, optional): Valore utilizzato per evitare il log(0). Default è 1e-15.
-        reg_lambda (float, optional): Parametro di regolarizzazione L2. Default è 0.01.
 
     Returns:
         numpy.ndarray: La cross-entropy tra net_output e labels se der è False, altrimenti la sua derivata.
