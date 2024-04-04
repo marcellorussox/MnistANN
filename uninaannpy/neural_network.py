@@ -263,11 +263,26 @@ class NeuralNetwork:
         return format_percentage(compute_accuracy(output, labels))
 
     def print_accuracies(self, title, test_in, test_labels, train_in, train_labels):
+        """
+        Stampa le accuratezze della rete neurale sui set di test e di addestramento.
+
+        Argomenti:
+        - title (str): Il titolo da stampare prima di visualizzare le accuratezze.
+        - test_in (numpy.ndarray): Il set di input di test.
+        - test_labels (numpy.ndarray): Le etichette di test corrispondenti.
+        - train_in (numpy.ndarray): Il set di input di addestramento.
+        - train_labels (numpy.ndarray): Le etichette di addestramento corrispondenti.
+
+        Restituisce:
+        - net_accuracy_test (float): L'accuratezza della rete neurale sul set di test.
+
+        Stampa il titolo specificato, seguito dall'accuratezza della rete neurale sui set di test e di addestramento.
+        """
         print(title)
         net_accuracy_test = self.network_accuracy(test_in, test_labels)
-        print(f'Test accuracy: {net_accuracy_test}%')
+        print(f'Test accuracy: {net_accuracy_test}')
         net_accuracy_training = self.network_accuracy(train_in, train_labels)
-        print(f'Train accuracy: {net_accuracy_training}%')
+        print(f'Train accuracy: {net_accuracy_training}')
         return net_accuracy_test
 
     def rprops(self, weights_der, weights_delta, weights_der_prev, layer_weights_difference_prev, train_error,
