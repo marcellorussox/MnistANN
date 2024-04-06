@@ -461,11 +461,12 @@ class NeuralNetwork:
         # Ferma il timer
         end_time = time.time()
 
-        print("L'addestramento ha impiegato", round(end_time - start_time, 5), "secondi per eseguire.")
+        time_diff = end_time - start_time
+        print("L'addestramento ha impiegato", round(time_diff, 5), "secondi per eseguire.")
 
         best_net.copy_params_in_network(self)
 
-        return train_errors, validation_errors, train_accuracies, validation_accuracies
+        return train_errors, validation_errors, train_accuracies, validation_accuracies, time_diff
 
     def copy_params_in_network(self, destination_net):
         """
