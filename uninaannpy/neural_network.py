@@ -492,9 +492,9 @@ class NeuralNetwork:
             x (int): Indice dell'esempio da testare.
             data_in (numpy.ndarray): Insieme di dati di test.
         """
-        ix = np.reshape(data_in[:, x], (28, 28))
+        image = np.reshape(data_in[:, x], (28, 28))
         plt.figure()
-        plt.imshow(ix, 'gray')
+        plt.imshow(image, 'gray')
         net_out = self.forward_propagation(data_in[:, x:x + 1])
 
         # Utilizza la funzione softmax per ottenere valori probabilistici
