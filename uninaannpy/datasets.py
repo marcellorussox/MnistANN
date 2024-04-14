@@ -3,7 +3,7 @@ import numpy as np
 
 def get_mnist_training(dataset, validation_index):
     """
-    Funzione per creare input e target per il training set a partire da un dataset MNIST.
+    Funzione per creare input e target per il train set a partire dal MNIST.
 
     Args:
         dataset (numpy.ndarray): Il dataset MNIST completo.
