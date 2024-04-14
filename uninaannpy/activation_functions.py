@@ -64,9 +64,6 @@ def leaky_relu(x, der=False, alpha=0.01):
 
     Returns:
         float: Se der=False, restituisce il valore della funzione Leaky ReLU di x, altrimenti restituisce la sua derivata.
-
-    Raises:
-        ValueError: Se il valore di der non è valido.
     """
     if not der:
         return np.where(x > 0, x, alpha * x)
