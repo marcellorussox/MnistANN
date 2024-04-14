@@ -11,8 +11,8 @@ def sum_of_squares(net_output, labels, der=False):
         der (bool, optional): Se è False, calcola la funzione di somma dei quadrati, altrimenti calcola la derivata. Default è False.
 
     Returns:
-        float: Se compute_derivative=False, restituisce il valore della funzione di somma dei quadrati.
-        numpy.ndarray: Se compute_derivative=True, restituisce il vettore differenza tra net_output e labels.
+        float: Se der=False, restituisce il valore della funzione di somma dei quadrati.
+        numpy.ndarray: Se der=True, restituisce il vettore differenza tra net_output e labels.
     """
     z = net_output - labels
     if not der:
@@ -26,16 +26,15 @@ def softmax(net_output):
     Calcola la funzione softmax per ogni elemento del vettore net_output.
 
     Args:
-    y (numpy.ndarray): Vettore di valori.
+        y (numpy.ndarray): Vettore di valori.
 
     Returns:
-    numpy.ndarray: Vettore di probabilità normalizzato tramite la funzione softmax.
+        numpy.ndarray: Vettore di probabilità normalizzato tramite la funzione softmax.
     """
     # Calcola l'esponenziale di ogni elemento nel vettore y
     y_exp = np.exp(net_output - net_output.max(axis=0))
 
     # Calcola la somma lungo l'asse 0 del vettore y_exp
-    # Questo sarà utilizzato come denominatore per la normalizzazione
     denominator = np.sum(y_exp, axis=0)
 
     # Calcola la funzione softmax normalizzata
@@ -77,7 +76,6 @@ def cross_entropy(net_output, labels, der=False, epsilon=1e-15):
         labels (numpy.ndarray): Array contenente le etichette di classe corrispondenti.
         der (bool, optional): Se True, calcola la derivata della cross-entropy rispetto all'output. Default è False.
         epsilon (float, optional): Valore utilizzato per evitare il logaritmo di zero. Default è 1e-15.
-        lambda_reg (float, optional): Parametro di regolarizzazione L2. Default è 0.1.
 
     Returns:
         numpy.ndarray: La cross-entropy tra l'output della rete e le etichette fornite se der è False, altrimenti la sua derivata.
