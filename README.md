@@ -143,40 +143,11 @@ In (7), uniamo informazioni "locali" sulla superficie dell'errore (il segno dell
 Nel caso in cui la derivata cambi di segno, l'algoritmo iRprop+ descritto nella sezione precedente esegue due azioni aggiuntive rispetto alla semplice riduzione della dimensione del passo: in primo luogo, applica un rollback dei pesi solo nei rari casi in cui l'errore complessivo aumenta. In secondo luogo, forza sempre la derivata ${\partial E}^{(t)}/{\partial w_{ij}}^{(t)}$ a zero. L'algoritmo che prende il nome di Improved Rprop (iRprop-) è identico a iRprop+ ma senza backtracking dei pesi. Quando il segno di una derivata parziale cambia, iRprop- diminuisce la dimensione del passo corrispondente senza influenzare il peso stesso. Inoltre, si assicura che nel passaggio successivo il peso venga modificato utilizzando la dimensione del passo ridotta. È importante notare che una dimensione del passo non può essere ulteriormente ridotta se lo è stata nel passaggio precedente. L'unica variazione rispetto a Rprop- è l'impostazione della derivata a zero quando questa cambia segno rispetto all'epoca precedente.
 
 
-\subsection{Implementazione}
+## Implementazione
 
 L'implementazione dei quattro tipi di Rprop è gestita attraverso una singola funzione che seleziona la variante da utilizzare in base a un parametro. Questo approccio consente di gestire le parti comuni dell'algoritmo insieme alle istruzioni specifiche per ciascuna variante, semplificando il codice e rendendolo più efficiente. Lo pseudocodice della funzione *rprops* contenuta nel modulo *neural_network.py* è illustrato in (8). La scelta di integrare tutte le varianti in un unico algoritmo è stata dettata dalla loro notevole similarità, che permette di evitare duplicazioni nel codice.
 
-
-\begin{equation}
-\begin{aligned}
-\textbf{for} & \textbf{ each } w_{ij} \textbf{ do } \{ \\
-& \textbf{if } \frac{\partial E} {\partial w_{ij}}^{(t-1)} \cdot \frac{\partial E}{\partial w_{ij}}^{(t)} > 0 \textbf{ then } \{ \\
-& \hspace{5mm} \Delta^{(t)}_{ij} := \min(\eta^+ \cdot \Delta^{(t-1)}_{ij}, \Delta_{\text{max}}) \\
-& \hspace{5mm} \Delta w_{ij}^{(t)} := -\text{sign}\left(\frac{\partial E}{\partial w_{ij}}^{(t)}\right) \cdot \Delta_{ij}^{(t)} \\
-& \} \textbf{ else if } \frac{\partial E} {\partial w_{ij}}^{(t-1)} \cdot \frac{\partial E}{\partial w_{ij}}^{(t)} < 0 \textbf{ then } \{ \\
-& \hspace{5mm} \Delta^{(t)}_{ij} := \max(\eta^- \cdot \Delta^{(t-1)}_{ij}, \Delta_{\text{min}}) \\
-& \hspace{5mm} \textbf{if } \textit{rprop\_type} = \text{Rprop-} \lor \textit{rprop\_type} = \text{iRprop-} \textbf{ then } \{ \\
-& \hspace{9mm} \Delta w_{ij}^{(t)} := -\text{sign}\left(\frac{\partial E}{\partial w_{ij}}^{(t)}\right) \cdot \Delta_{ij}^{(t)} \\
-& \hspace{5mm} \} \textbf{ else } \{\\
-& \hspace{9mm} \textbf{if } \textit{rprop\_type} = \text{Rprop+} \lor E^{(t)} > E^{(t-1)} \textbf{ then } \{ \\
-& \hspace{13mm} \Delta w_{ij}^{(t)} := -\Delta w_{ij}^{(t-1)} \\
-& \hspace{9mm} \} \textbf{ else } \{ \\
-& \hspace{13mm} \Delta w_{ij}^{(t)} := 0 \\
-& \hspace{9mm} \} \\
-& \hspace{5mm} \} \\
-& \hspace{5mm} \textbf{if } \textit{rprop\_type} \neq \text{Rprop-} \textbf{ then } \{ \\
-& \hspace{9mm} \frac{\partial E}{\partial w_{ij}}^{(t)} := 0 \\
-& \hspace{5mm} \} \\
-& \} \textbf{ else if } \frac{\partial E} {\partial w_{ij}}^{(t-1)} \cdot \frac{\partial E}{\partial w_{ij}}^{(t)} = 0 \textbf{ then } \{ \\
-& \hspace{5mm} \Delta w_{ij}^{(t)} := -\text{sign}\left(\frac{\partial E}{\partial w_{ij}}^{(t)}\right) \cdot \Delta_{ij}^{(t)} \\
-& \} \\
-& w_{ij}^{(t+1)} := w_{ij}^{(t)} + \Delta w_{ij}^{(t)} \\
-\}
-\end{aligned}
-\label{eq:rprop_pseudocode}
-\end{equation}
-
+![](rprops_pseudocode.png)
 
 ## Esperimenti
 
