@@ -57,28 +57,28 @@ def get_mnist_validation(dataset, validation_index):
     return validation_input, validation_labels
 
 
-def get_mnist_testing(dataset):
+def get_mnist_test(dataset):
     """
-    Crea input e target per il set di testing utilizzando il dataset MNIST.
+    Crea input e target per il set di test utilizzando il dataset MNIST.
 
     Args:
         dataset (numpy.ndarray): Il dataset MNIST completo.
 
     Returns:
-        tuple: Una tupla contenente i dati di input di testing e le relative etichette.
+        tuple: Una tupla contenente i dati di input di test e le relative etichette.
     """
 
-    # Estrae i dati di testing dal dataset
+    # Estrae i dati di test dal dataset
     data_test = dataset.T
 
-    # Estrae le etichette di testing
-    test_labels = data_test[0]  # Etichette di testing
+    # Estrae le etichette di test
+    test_labels = data_test[0]  # Etichette di test
 
     # Riduce il numero di etichette a 10
     test_labels = get_mnist_labels(test_labels)
 
-    # Estrae i dati di input di testing
-    test_input = data_test[1:]  # Dati di input di testing
+    # Estrae i dati di input di test
+    test_input = data_test[1:]  # Dati di input di test
 
     return test_input, test_labels
 
