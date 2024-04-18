@@ -17,16 +17,16 @@ def get_mnist_training(dataset, validation_index):
     data_train = dataset[validation_index:].T
 
     # Estrae le etichette di training
-    train_labels = data_train[0]  # Etichette di training
+    train_Y = data_train[0]  # Etichette di training
 
     # Riduce il numero di etichette a 10
-    train_labels = get_mnist_labels(train_labels)
+    train_Y = get_mnist_labels(train_Y)
 
     # Estrae i dati di input di training e normalizza dividendo per 255
-    train_input = data_train[1:]  # Dati di input di training
-    train_input = train_input / 255.  # Normalizzazione dei dati divisi per 255
+    train_X = data_train[1:]  # Dati di input di training
+    train_X = train_X / 255.  # Normalizzazione dei dati divisi per 255
 
-    return train_input, train_labels
+    return train_X, train_Y
 
 
 def get_mnist_validation(dataset, validation_index):
@@ -45,16 +45,16 @@ def get_mnist_validation(dataset, validation_index):
     data_val = dataset[:validation_index - 1].T
 
     # Estrae le etichette di validation
-    validation_labels = data_val[0]  # Etichette di validation
+    validation_Y = data_val[0]  # Etichette di validation
 
     # Riduce il numero di etichette a 10
-    validation_labels = get_mnist_labels(validation_labels)
+    validation_Y = get_mnist_labels(validation_Y)
 
     # Estrae i dati di input di validation e normalizza dividendo per 255
-    validation_input = data_val[1:]  # Dati di input di validation
-    validation_input = validation_input / 255.  # Normalizzazione dei dati divisi per 255
+    validation_X = data_val[1:]  # Dati di input di validation
+    validation_X = validation_X / 255.  # Normalizzazione dei dati divisi per 255
 
-    return validation_input, validation_labels
+    return validation_X, validation_Y
 
 
 def get_mnist_test(dataset):
@@ -72,15 +72,15 @@ def get_mnist_test(dataset):
     data_test = dataset.T
 
     # Estrae le etichette di test
-    test_labels = data_test[0]  # Etichette di test
+    test_Y = data_test[0]  # Etichette di test
 
     # Riduce il numero di etichette a 10
-    test_labels = get_mnist_labels(test_labels)
+    test_Y = get_mnist_labels(test_Y)
 
     # Estrae i dati di input di test
-    test_input = data_test[1:]  # Dati di input di test
+    test_X = data_test[1:]  # Dati di input di test
 
-    return test_input, test_labels
+    return test_X, test_Y
 
 
 def get_mnist_labels(labels):
