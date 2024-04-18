@@ -248,40 +248,38 @@ class NeuralNetwork:
 
         return weight_gradients
 
-    def network_accuracy(self, input_data, labels):
+    def network_accuracy(self, X, Y):
         """
         Calcola l'accuratezza della rete neurale su un insieme di dati di input e target specificato.
 
         Args:
-            input_data (numpy.ndarray): Dati di input su cui valutare la rete.
-            labels (numpy.ndarray): Target desiderati per i dati di input.
+            X (numpy.ndarray): Dati di input su cui valutare la rete.
+            Y (numpy.ndarray): Target desiderati per i dati di input.
 
         Returns:
             float: Percentuale di predizioni corrette rispetto ai target desiderati.
         """
-        output = self.forward_propagation(input_data)
-        return compute_accuracy(output, labels)
+        output = self.forward_propagation(X)
+        return compute_accuracy(output, Y)
 
-    def print_accuracies(self, title, test_in, test_labels, train_in, train_labels):
+    def print_accuracies(self, title, test_X, test_Y, train_X, train_Y):
         """
-        Stampa le accuratezze della rete neurale sui set di test e di addestramento.
+        Stampa il titolo specificato, seguito dall'accuratezza della rete neurale sui set di test e di addestramento.
 
         Argomenti:
-        - title (str): Il titolo da stampare prima di visualizzare le accuratezze.
-        - test_in (numpy.ndarray): Il set di input di test.
-        - test_labels (numpy.ndarray): Le etichette di test corrispondenti.
-        - train_in (numpy.ndarray): Il set di input di addestramento.
-        - train_labels (numpy.ndarray): Le etichette di addestramento corrispondenti.
+            title (str): Il titolo da stampare prima di visualizzare le accuratezze.
+            test_X (numpy.ndarray): Il set di input di test.
+            test_Y (numpy.ndarray): Le etichette di test corrispondenti.
+            train_X (numpy.ndarray): Il set di input di addestramento.
+            train_Y (numpy.ndarray): Le etichette di addestramento corrispondenti.
 
-        Restituisce:
-        - net_accuracy_test (float): L'accuratezza della rete neurale sul set di test.
-
-        Stampa il titolo specificato, seguito dall'accuratezza della rete neurale sui set di test e di addestramento.
+        Returns:
+            net_accuracy_test (float): L'accuratezza della rete neurale sul set di test.
         """
         print(title)
-        net_accuracy_test = self.network_accuracy(test_in, test_labels)
+        net_accuracy_test = self.network_accuracy(test_X, test_Y)
         print(f'Test accuracy: {np.round(net_accuracy_test, 5)}')
-        net_accuracy_training = self.network_accuracy(train_in, train_labels)
+        net_accuracy_training = self.network_accuracy(train_X, train_Y)
         print(f'Train accuracy: {np.round(net_accuracy_training, 5)}')
         return net_accuracy_test
 
@@ -371,16 +369,16 @@ class NeuralNetwork:
 
         return layer_weights_difference
 
-    def train_neural_network(self, train_in, train_labels, validation_in, validation_labels, epochs=100,
+    def train_neural_network(self, train_X, train_Y, validation_X, validation_Y, epochs=35,
                              learning_rate=0.00001, rprop_type=RpropType.STANDARD):
         """
         Processo di apprendimento per la rete neurale.
 
         Args:
-            train_in (numpy.ndarray): Dati di input per il training.
-            train_labels (numpy.ndarray): Target desiderati per i dati di input di training.
-            validation_in (numpy.ndarray): Dati di input per la validazione.
-            validation_labels (numpy.ndarray): Target desiderati per i dati di input di validazione.
+            train_X (numpy.ndarray): Dati di input per il training.
+            train_Y (numpy.ndarray): Target desiderati per i dati di input di training.
+            validation_X (numpy.ndarray): Dati di input per la validazione.
+            validation_Y (numpy.ndarray): Target desiderati per i dati di input di validazione.
             epochs (int, optional): Numero massimo di epoche per il training (default: 100).
             learning_rate (float, optional): Tasso di apprendimento per il gradiente discendente (default: 0.1).
             rprop_type (RpropType): Tipo di Rprop da utilizzare (default: RpropType.STANDARD).
@@ -412,17 +410,17 @@ class NeuralNetwork:
         for epoch in range(epochs + 1):
 
             # Forward propagation per training set
-            train_net_out = self.forward_propagation(train_in)
-            train_error = error_function(train_net_out, train_labels)
+            train_net_out = self.forward_propagation(train_X)
+            train_error = error_function(train_net_out, train_Y)
             train_errors.append(train_error)
 
             # Forward propagation per validation set
-            validation_net_out = self.forward_propagation(validation_in)
-            validation_error = error_function(validation_net_out, validation_labels)
+            validation_net_out = self.forward_propagation(validation_X)
+            validation_error = error_function(validation_net_out, validation_Y)
             validation_errors.append(validation_error)
 
-            train_accuracy = compute_accuracy(train_net_out, train_labels)
-            validation_accuracy = compute_accuracy(validation_net_out, validation_labels)
+            train_accuracy = compute_accuracy(train_net_out, train_Y)
+            validation_accuracy = compute_accuracy(validation_net_out, validation_Y)
             train_accuracies.append(train_accuracy)
             validation_accuracies.append(validation_accuracy)
             print(f'\nEpoca: {epoch}/{epochs}   Rprop utilizzata: {rprop_type}\n'
@@ -433,8 +431,8 @@ class NeuralNetwork:
                 break
 
             # Calcolo gradienti dei pesi e Back-propagation
-            layer_out, layer_act_fun_der = self.compute_gradients(train_in)
-            weights_der = self.back_propagation(layer_act_fun_der, layer_out, train_labels, error_function)
+            layer_out, layer_act_fun_der = self.compute_gradients(train_X)
+            weights_der = self.back_propagation(layer_act_fun_der, layer_out, train_Y, error_function)
 
             if epoch == 0:  # Prima epoca
                 # Aggiornamento pesi tramite discesa del gradiente
@@ -483,19 +481,19 @@ class NeuralNetwork:
         # Copia delle funzioni di attivazione
         destination_net.hidden_activation_functions = self.hidden_activation_functions
 
-    def test_prediction(self, x, data_in):
+    def test_prediction(self, x, data_X):
         """
         Ottiene un esempio di predizione della rete neurale e lo visualizza insieme all'immagine corrispondente.
 
         Args:
             self (NeuralNetwork): Rete neurale da testare.
             x (int): Indice dell'esempio da testare.
-            data_in (numpy.ndarray): Insieme di dati di test.
+            data_X (numpy.ndarray): Insieme di dati di test.
         """
-        image = np.reshape(data_in[:, x], (28, 28))
+        image = np.reshape(data_X[:, x], (28, 28))
         plt.figure()
         plt.imshow(image, 'gray')
-        net_out = self.forward_propagation(data_in[:, x:x + 1])
+        net_out = self.forward_propagation(data_X[:, x:x + 1])
 
         # Utilizza la funzione softmax per ottenere valori probabilistici
         net_out = ef.softmax(net_out)
