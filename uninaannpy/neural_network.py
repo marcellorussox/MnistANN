@@ -529,3 +529,74 @@ def compute_accuracy(output, labels):
     accuracy = correct_predictions / num_samples
 
     return accuracy
+
+
+def metrics_mean_variance(metrics_list, epochs, number_of_runs):
+    """
+    Calcola la media e la varianza delle metriche per ogni epoca attraverso diverse esecuzioni di addestramento.
+
+    Args:
+        metrics_list (list): Una lista di liste contenente le metriche ottenute da diverse esecuzioni di addestramento.
+                             Ogni sottolista corrisponde a una singola esecuzione e contiene le metriche calcolate
+                             per ogni epoca.
+        epochs (int): Il numero totale di epoche.
+        number_of_runs (int): Il numero totale di esecuzioni di addestramento.
+
+    Returns:
+        tuple: Una tupla contenente quattro elementi:
+               - metrics_mean: Lista delle medie delle metriche per ogni epoca.
+               - metrics_variance: Lista delle varianze normalizzate delle metriche per ogni epoca.
+               - last_metrics_mean: Lista delle ultime medie delle metriche.
+               - last_metrics_variance: Lista delle ultime varianze normalizzate delle metriche.
+    """
+    numbers_of_metrics = len(metrics_list[0])
+    metrics_mean = [[] for _ in range(numbers_of_metrics)]
+    metrics_variance = [[] for _ in range(numbers_of_metrics)]
+
+    for metric in range(numbers_of_metrics - 1):
+        for epoch in range(epochs + 1):
+            metric_mean, metric_variance = 0, 0
+            for run in range(number_of_runs):
+                # Calcola la media per questa epoca e questa metrica attraverso tutte le run
+                metric_mean += metrics_list[run][metric][epoch] / number_of_runs
+            # Aggiungo la media alla lista delle medie della metrica corrispondente
+            metrics_mean[metric].append(metric_mean)
+
+            for run in range(number_of_runs):
+                # Calcola la varianza per questa epoca e questa metrica attraverso tutte le run
+                metric_variance += pow(metrics_list[run][metric][epoch] - metric_mean, 2) / number_of_runs
+            # Calcola la varianza normalizzata rispetto alla media, per poter confrontare reti diverse
+            norm_variance = metric_variance / metric_mean
+            # Aggiunge la media alla lista delle medie della metrica corrispondente
+            metrics_variance[metric].append(norm_variance)
+
+    time_mean, time_variance = 0, 0
+    for run in range(number_of_runs):
+        # Calcola la media dei tempi di esecuzione di tutte le run
+        time_mean += metrics_list[run][-1] / number_of_runs
+    metrics_mean[-1] = time_mean
+
+    for run in range(number_of_runs):
+        # Calcola la varianza per questa epoca e questa metrica attraverso tutte le run
+        time_variance += pow(metrics_list[run][-1] - time_mean, 2) / number_of_runs
+    metrics_variance[-1] = time_variance
+
+    # Prende l'ultima media di ogni metrica che rappresenta l'ultima epoca
+    last_metrics_mean = [round(metric_mean[-1], 5) if isinstance(metric_mean, list) else round(metric_mean, 5) for
+                         metric_mean in metrics_mean]
+
+    # Prende l'ultima varianza di ogni metrica che rappresenta l'ultima epoca
+    last_metrics_variance = [
+        round(metric_variance[-1], 5) if isinstance(metric_variance, list) else round(metric_variance, 5) for
+        metric_variance in metrics_variance]
+
+    metrics = ["Train Error", "Validation Error", "Train Accuracy", "Validation Accuracy", "Time"]
+
+    # Stampa delle metriche raggruppate per media e varianza
+    for metric, mean, var in zip(metrics, last_metrics_mean, last_metrics_variance):
+        print(f"{metric}:")
+        print(f"Media: {mean}")
+        print(f"Varianza: {var}")
+        print()
+
+    return metrics_mean, metrics_variance, last_metrics_mean, last_metrics_variance
