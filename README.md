@@ -7,7 +7,7 @@ Questo studio esplora le prestazioni di diverse varianti dell'algoritmo di ottim
 
 ## Installazione e Utilizzo
 
-Per utilizzare questa libreria e testare le implementazioni di Rprop e le sue varianti, è necessario scaricare la directory "data" da questo [link](https://communitystudentiunina-my.sharepoint.com/:f:/g/personal/marcello_russo_studenti_unina_it/EiPFCnSwqWRLqyyW8EQc_BABTgJt9vDTe7yOF3l9Z1OoFQ?e=A1JIAX) e inserirla nella directory del repository.
+Per utilizzare questa libreria e testare le implementazioni di Rprop e le sue varianti, è necessario scaricare la directory "data" da questo [link](https://communitystudentiunina-my.sharepoint.com/:f:/g/personal/marcello_russo_studenti_unina_it/EiPFCnSwqWRLqyyW8EQc_BABTgJt9vDTe7yOF3l9Z1OoFQ?e=A1JIAX) e inserirla nella directory "src".
 
 ## Introduzione
 
