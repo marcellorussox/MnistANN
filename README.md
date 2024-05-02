@@ -161,39 +161,39 @@ Nel presente capitolo vengono presentate tre tabelle relative alle diverse dimen
 Dalle tabelle emerge un trend interessante: le varianti degli algoritmi Rprop senza weight backtracking (Rprop- e iRprop-) sembrano presentare prestazioni superiori rispetto alle controparti che ne fanno uso. Questa osservazione è supportata dall'accuratezza media più elevata ottenuta da Rprop- e iRprop- su tutti e tre i set di dati considerati.
 
 
-|          32 neuroni     |500 esecuzioni| Algoritmi |         |        |         |
-|-------------------------|--------------|-----------|---------|--------|---------|
-|                         |              | Rprop-    | Rprop+  | iRprop-| iRprop+ |
-| **Accuratezza**         | Train        | 0.94683   | 0.93662 | 0.948  | 0.94368 |
-|                         | Validation   | 0.93663   | 0.92953 | 0.9369 | 0.93389 |
-|                         | Test         | 0.93677   | 0.9295  | 0.93705| 0.9295  |
-| **Errore**              | Train        | 8653.55   | 10282.2 | 8465.15| 9240.74 |
-|                         | Validation   | 2797.39   | 3070.71 | 2842.81| 2977.49 |
-| **Tempo**               | Media        | 15.20     | 9.45    | 9.61   | 9.34    |
-|                         | Varianza     | 11.43     | 2.4     | 0.22   | 0.26    |
+|          32 neuroni     |500 esecuzioni| Algoritmi |         |         |         |
+|-------------------------|--------------|----------|---------|---------|---------|
+|                         |              | Rprop-   | Rprop+  | iRprop- | iRprop+ |
+| **Accuratezza**         | Train        | 0.94938  | 0.93936 | 0.9503  | 0.94689 |
+|                         | Validation   | 0.93437  | 0.92708 | 0.93439 | 0.93202 |
+|                         | Test         | 0.93698  | 0.92941 | 0.93705 | 0.92941 |
+| **Errore**              | Train        | 8239.03  | 9839.29 | 8106.89 | 8709.11 |
+|                         | Validation   | 3029.93  | 3325.29 | 3090.95 | 3201.24 |
+| **Tempo**               | Media        | 16.74    | 20.51   | 10.54   | 18.42   |
+|                         | Varianza     | 13.35    | 37.19   | 3.34    | 21.18   |
 
 
 |        64 neuroni       |500 esecuzioni| Algoritmi |         |        |         |
 |-------------------------|--------------|-----------|---------|--------|---------|
 |                         |              | Rprop-    | Rprop+  | iRprop-| iRprop+ |
-| **Accuratezza**         | Train        | 0.95977   | 0.94988 | 0.96009| 0.95384 |
-|                         | Validation   | 0.94496   | 0.93863 | 0.94413| 0.94008 |
-|                         | Test         | 0.94675   | 0.94017 | 0.94574| 0.94017 |
-| **Errore**              | Train        | 6538.77   | 8128.81 | 6605.99| 7820.28 |
-|                         | Validation   | 2634.62   | 2858.24 | 2818.8 | 3027.45 |
-| **Tempo**               | Media        | 17.20     | 18.05   | 13.50  | 13.25   |
-|                         | Varianza     | 4.24      | 6.29    | 2.08   | 0.56    |
+| **Accuratezza**         | Train        | 0.96134   | 0.95145 | 0.96154| 0.95609 |
+|                         | Validation   | 0.94667   | 0.94051 | 0.94566| 0.94215 |
+|                         | Test         | 0.94673   | 0.94035 | 0.94586| 0.94035 |
+| **Errore**              | Train        | 6271.99   | 7834.69 | 6331.98| 7376.01 |
+|                         | Validation   | 2648.43   | 2870.71 | 2820.66| 3011.74 |
+| **Tempo**               | Media        | 24.54     | 14.25   | 14.60  | 14.24   |
+|                         | Varianza     | 33.29     | 2.15    | 1.02   | 0.61    |
 
 |         128 neuroni     |500 esecuzioni| Algoritmi |         |        |         |
-|-------------------------|--------------|-----------|---------|--------|---------|
-|                         |              | Rprop-    | Rprop+  | iRprop-| iRprop+ |
-| **Accuratezza**         | Train        | 0.97025   | 0.95697 | 0.96891| 0.95993 |
-|                         | Validation   | 0.95141   | 0.94302 | 0.94978| 0.94388 |
-|                         | Test         | 0.95367   | 0.94574 | 0.9519 | 0.94574 |
-| **Errore**              | Train        | 4907.76   | 7122.76 | 5324.79| 7459.04 |
-|                         | Validation   | 2442.69   | 2767.75 | 2745.24| 3222.68 |
-| **Tempo**               | Media        | 29.45     | 22.77   | 23.39  | 23.12   |
-|                         | Varianza     | 20.07     | 4.61    | 1.64   | 3.19    |
+|-------------------------|--------------|----------|---------|--------|---------|
+|                         |              | Rprop-   | Rprop+  | iRprop-| iRprop+ |
+| **Accuratezza**         | Train        | 0.972    | 0.9594  | 0.97114| 0.96327 |
+|                         | Validation   | 0.95019  | 0.94276 | 0.94858| 0.94342 |
+|                         | Test         | 0.95291  | 0.94535 | 0.95153| 0.94535 |
+| **Errore**              | Train        | 4599.94  | 6648.41 | 4905.60| 6539.45 |
+|                         | Validation   | 2553.69  | 2800.12 | 2900.33| 3255.85 |
+| **Tempo**               | Media        | 34.90    | 24.58   | 25.45  | 25.65   |
+|                         | Varianza     | 35.32    | 1.98    | 2.74   | 14.93    |
 
 
 Tuttavia, una considerazione importante riguarda il tempo di esecuzione: l'algoritmo Rprop- risulta essere più lento rispetto alle altre varianti e presenta una varianza significativamente più alta. D'altra parte, iRprop- emerge come la variante che offre un'elevata accuratezza, tempi di esecuzione tra i più bassi e varianza minima.
