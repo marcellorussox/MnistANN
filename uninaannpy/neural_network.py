@@ -97,8 +97,7 @@ class NeuralNetwork:
 
         # Ottiene le funzioni di attivazione per ogni strato, incluso quello di output
         activation_functions = [self.hidden_activation_functions[layer].__name__ for layer in
-                                range(num_hidden_layers)] + [
-                                   self.hidden_activation_functions[num_hidden_layers].__name__]
+                                range(num_hidden_layers)] + [self.hidden_activation_functions[num_hidden_layers].__name__]
 
         # Ottiene il nome della funzione di errore
         error_function = self.error_function.__name__
