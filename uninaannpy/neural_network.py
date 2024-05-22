@@ -181,8 +181,6 @@ class NeuralNetwork:
         # Inizializza z con i dati di input
         a = input_data
         for layer in range(num_layers):
-            # Aggiungiamo la riga di 1 per l'input x_0 il cui peso sarà il bias
-            z = np.insert(z, 0, ones_row, axis=0)
             # Aggiunge il bias (x_0 = 1) all'input del layer corrente
             ones_row = np.ones((1, a.shape[1]))
             a = np.insert(a, 0, ones_row, axis=0)
