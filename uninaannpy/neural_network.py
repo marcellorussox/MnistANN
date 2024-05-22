@@ -178,20 +178,20 @@ class NeuralNetwork:
         activation_functions = self.hidden_activation_functions
         num_layers = len(self.layers_weights)
 
-        # Creiamo un vettore di 1 di dimensioni num_cols di input_data
-        ones_row = np.ones(input_data.shape[1])
-
         # Inizializza z con i dati di input
-        z = input_data
+        a = input_data
         for layer in range(num_layers):
             # Aggiungiamo la riga di 1 per l'input x_0 il cui peso sarà il bias
             z = np.insert(z, 0, ones_row, axis=0)
+            # Aggiunge il bias (x_0 = 1) all'input del layer corrente
+            ones_row = np.ones((1, a.shape[1]))
+            a = np.insert(a, 0, ones_row, axis=0)
 
             # Calcola l'output del layer corrente
-            a = np.matmul(weights[layer], z)
-            z = activation_functions[layer](a)
+            z = np.matmul(weights[layer], a)
+            a = activation_functions[layer](z)
 
-        return z
+        return a
 
     def gradient_descent(self, learning_rate, weights_der):
         """
