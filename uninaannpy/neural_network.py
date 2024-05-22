@@ -500,7 +500,7 @@ class NeuralNetwork:
 
         # Utilizza la funzione softmax per ottenere valori probabilistici
         net_out = ef.softmax(net_out)
-        print('Probabilità predette dalla rete:')
+        print('Probabilità predette dall\'ultima rete addestrata:')
         for i, probability in enumerate(net_out):
             print(f'Classe {i}: {probability[0]}')
 
