@@ -400,7 +400,7 @@ class NeuralNetwork:
         error_function = self.error_function
 
         # Inizializzazione delta e derivate precedenti
-        weights_delta, weights_der_prev, layer_weights_difference = None, None, None
+        weights_delta, error_der_prev, layer_weights_difference = None, None, None
 
         validation_error_prev = 999999
         min_validation_error = 999999
@@ -434,21 +434,21 @@ class NeuralNetwork:
                 break
 
             # Calcolo gradienti dei pesi e Back-propagation
-            layer_out, layer_act_fun_der = self.compute_gradients(train_X)
-            weights_der = self.back_propagation(layer_act_fun_der, layer_out, train_Y, error_function)
+            layer_out, layer_act_fun_der = self.activations_derivatives_calc(train_X)
+            error_der = self.back_propagation(layer_act_fun_der, layer_out, train_Y, error_function)
 
             if epoch == 0:  # Prima epoca
                 # Aggiornamento pesi tramite discesa del gradiente
-                self.gradient_descent(learning_rate, weights_der)
+                self.gradient_descent(learning_rate, error_der)
 
                 # Inizializzazione dei pesi e dei bias per la funzione Rprop
-                weights_delta = [[[0.1 for _ in row] for row in sub_list] for sub_list in weights_der]
-                layer_weights_difference = [[[0. for _ in row] for row in sub_list] for sub_list in weights_der]
+                weights_delta = [[[0.1 for _ in row] for row in sub_list] for sub_list in error_der]
+                layer_weights_difference = [[[0. for _ in row] for row in sub_list] for sub_list in error_der]
 
-                weights_der_prev = deepcopy(weights_der)
+                error_der_prev = deepcopy(error_der)
             else:
                 # Aggiornamento della rete utilizzando la funzione Rprop
-                layer_weights_difference = self.rprops(weights_der, weights_delta, weights_der_prev,
+                layer_weights_difference = self.rprops(error_der, weights_delta, error_der_prev,
                                                        layer_weights_difference, validation_error,
                                                        validation_error_prev, rprop_type=rprop_type)
 
