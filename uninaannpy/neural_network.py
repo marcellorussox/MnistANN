@@ -124,7 +124,7 @@ class NeuralNetwork:
         """
         return deepcopy(self)
 
-    def compute_gradients(self, input_data):
+    def activations_derivatives_calc(self, input_data):
         """
         Calcola le derivate e gli output dei neuroni della rete per la backpropagation.
 
@@ -146,8 +146,12 @@ class NeuralNetwork:
         activation_derivatives = []
 
         for layer in range(num_layers):
+            # Aggiunge il bias (x_0 = 1) all'input del layer corrente
+            ones_row = np.ones((1, layer_outputs[layer].shape[1]))
+            input_with_bias = np.insert(layer_outputs[layer], 0, ones_row, axis=0)
+
             # Trasformazione lineare tra i pesi e l'input del neurone corrente
-            result = np.dot(weights[layer][:, 1:], layer_outputs[layer]) + weights[layer][:, 0:1]
+            result = np.dot(weights[layer], input_with_bias)
             layer_output = activation_functions[layer](result)  # Output del layer dopo l'attivazione
 
             # Calcolo della derivata della funzione di attivazione
