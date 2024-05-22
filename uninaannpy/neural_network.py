@@ -35,10 +35,12 @@ class NeuralNetwork:
         self.hidden_layers = hidden_layers
 
         if len(hidden_activation_functions) != len(hidden_layers):
+            print('Numero funzioni di attivazione:', len(hidden_activation_functions))
+            print('Numero layer nascosti:', len(hidden_layers))
             raise ValueError("Il numero di funzioni di attivazione deve essere uguale al numero di layer!")
 
         self.hidden_activation_functions = hidden_activation_functions
-        hidden_activation_functions.append(output_activation_function)
+        self.hidden_activation_functions.append(output_activation_function)
         self.error_function = error_function
         self.number_of_hidden_layers = len(hidden_layers)
         self.__initialize_parameters(input_layer_size, output_layer_size)
