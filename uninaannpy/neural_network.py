@@ -179,17 +179,17 @@ class NeuralNetwork:
         num_layers = len(self.layers_weights)
 
         # Inizializza z con i dati di input
-        a = input_data
+        z = input_data
         for layer in range(num_layers):
             # Aggiunge il bias (x_0 = 1) all'input del layer corrente
-            ones_row = np.ones((1, a.shape[1]))
-            a = np.insert(a, 0, ones_row, axis=0)
+            ones_row = np.ones((1, z.shape[1]))
+            z = np.insert(z, 0, ones_row, axis=0)
 
             # Calcola l'output del layer corrente
-            z = np.matmul(weights[layer], a)
-            a = activation_functions[layer](z)
+            a = np.matmul(weights[layer], z)
+            z = activation_functions[layer](a)
 
-        return a
+        return z
 
     def gradient_descent(self, learning_rate, weights_der):
         """
